@@ -1,0 +1,3284 @@
+#include <windows.h>
+#include "win_getd.h"
+
+#define DLGEDIT         120
+#define DLGTEXT		140
+#define DLGRBN1		220
+#define DLGRBN2		230
+#define DLGRBN3		240
+#define DLGPB		260
+#define DLGCB		280
+#define DLGRBF		300
+#define DLGLOG		320
+#define	DLGSTAT		340
+#define	DLGPBF		360
+#define DLGLBX	        380
+
+#define INP_INT	1
+#define INP_INX 2
+#define INP_REA 3
+#define INP_REX 4
+#define INP_STR 5
+#define INP_RBN 6
+#define INP_MEN 6
+#define INP_RBX 7
+#define INP_RBF 8
+#define INP_LOG 9
+#define INP_PBF	10
+#define INP_RBR 11
+#define INP_CBR 12
+#define INP_LBX 13
+#define INP_STX 14
+#define INP_CBX 15
+#define INP_INI	16
+
+#define DLGINC	499
+#define DLGDEC	498
+
+HULLFORM_MEN MENU
+{
+ POPUP "&File"
+ {
+  MENUITEM "&New", 101
+  MENUITEM "&Open", 102
+  MENUITEM "&Save", 103
+  MENUITEM "save &As ...", 104
+  MENUITEM SEPARATOR
+  MENUITEM "read &Waterline", 105
+#ifdef EXT_OR_PROF
+  MENUITEM "read o&Verlay", 106
+#endif
+
+  POPUP "&Import"
+  {
+   MENUITEM "&Text file", 107
+#ifdef PROF
+   MENUITEM "&DXF file", 108
+   MENUITEM "&GHS file", 109
+   MENUITEM "DXF &Overlay", 110
+#endif
+  }
+
+  POPUP "&Export"
+  {
+    MENUITEM "&Waterlines", 111
+    MENUITEM "&Frame offsets", 112
+#ifdef PROF
+    MENUITEM "&DXF", 113
+	MENUITEM "DXF &Frames", 114
+	MENUITEM "DXF &Plates", 115
+#endif
+    MENUITEM "&VRML", 116
+#ifdef PROF
+	MENUITEM "&GHS", 117
+	MENUITEM "DXF &Mesh", 118
+	MENUITEM "&ORC offsets", 119
+#endif
+  }
+
+  MENUITEM SEPARATOR
+  MENUITEM "&Print", 120
+#ifdef PROF
+  MENUITEM "p&Lot", 121
+#endif
+
+  MENUITEM SEPARATOR
+  MENUITEM "e&Xit", 122
+  MENUITEM SEPARATOR
+ }
+
+ POPUP "&Edit"
+ {
+  MENUITEM "&Copy to clipboard", 201
+  MENUITEM SEPARATOR
+  MENUITEM "&New section", 202
+  MENUITEM "&Delete a section", 203
+  MENUITEM "&Edit sections", 204
+  MENUITEM SEPARATOR
+  MENUITEM "&Insert a line", 205
+  MENUITEM "&Remove a line", 206
+  MENUITEM "&Smooth a line", 207
+  POPUP "&Lines at stem"
+  {
+   MENUITEM "&Stem line", 208
+   MENUITEM "&Fair stem to stem line", 209
+#ifdef PROF
+   MENUITEM "&Radius of line at stem", 210
+#endif
+  }
+
+  MENUITEM "line &Properties", 211
+  MENUITEM SEPARATOR
+  MENUITEM "&Multiply/add", 212
+  MENUITEM "&Units conversion", 213
+  MENUITEM "&Alter sectioning", 214
+#ifdef PROF
+  MENUITEM "&Orientate lines", 215
+  MENUITEM SEPARATOR
+  MENUITEM "&Transom", 216
+  POPUP "Cat. con&Versions"
+  {
+   MENUITEM "&Stem line", 217
+   MENUITEM "&Convert monohull to catamaran", 218
+   MENUITEM "&Move hulls in or out", 219
+  }
+#endif
+
+#ifndef FREEWARE
+  MENUITEM "NACA pr&Ofile", 220
+#ifdef PROF
+  MENUITEM "Stra&ke", 221
+#endif
+#endif
+ }
+
+ POPUP "&View"
+ {
+  MENUITEM "&General orthogonal", 301
+  MENUITEM "&Top view", 302
+  MENUITEM "&Elevation", 303
+  MENUITEM "e&Nd elevation", 304
+  MENUITEM "&Full perspective", 305
+  MENUITEM "&Port perspective", 306
+  MENUITEM "&Starboard persp.", 307
+
+#ifdef PROF
+  MENUITEM "shell e&Xpansion", 308
+#endif
+
+  MENUITEM "view &Options", 309
+
+#ifdef PROF
+  MENUITEM "&Zoom rectangle", 310
+  MENUITEM "zoom &In", 311
+  MENUITEM "zoom o&Ut", 312
+#endif
+
+ }
+
+ POPUP "&Statics"
+ {
+  MENUITEM "&Settings", 401
+  MENUITEM "&Balance hull", 402
+#ifdef PROF
+  MENUITEM "balance &All", 403
+#endif
+  MENUITEM "&Evaluate statics", 404
+  MENUITEM "&Write variables", 405
+#ifdef PROF
+  MENUITEM "&Variables plot", 406
+  MENUITEM "&Tabular output", 407
+  MENUITEM "&Immersed areas", 408
+#endif
+ }
+
+#ifdef PROF
+ POPUP "&Drag"
+ {
+  MENUITEM "&Speed", 501
+  MENUITEM "&Area plot", 502
+  POPUP "&Drag for one speed"
+  {
+   MENUITEM "&Gerritsma et al. 1981", 503
+   MENUITEM "&Gerritsma et al. 1996.", 504
+   MENUITEM "&Oortmerrssen", 505
+   MENUITEM "&Holtrop && Mennen", 506
+   MENUITEM "&Savitsky", 507
+   MENUITEM "savitsky && &Brown", 508
+  }
+
+  MENUITEM "&Plot drag curves", 509
+ }
+#endif
+
+#ifdef PROF
+ POPUP "&Plate"
+ {
+  MENUITEM "&Evaluate surface", 601
+  MENUITEM "&Plot rulings", 606
+  MENUITEM "&Undo rulings", 607
+  POPUP "&Rollout"
+  {
+   MENUITEM "&Current line pair", 608
+   MENUITEM "&Transom", 609
+  }
+  MENUITEM "&Fix transom curve", 610
+  MENUITEM "write &Sections", 612
+  MENUITEM "write 2d &Outline", 613
+  MENUITEM "write 3d e&Ndpoints", 614
+ }
+#endif
+
+#ifdef PROF
+
+ POPUP "&Tanks"
+ {
+  MENUITEM "&Edit tanks", 701
+  MENUITEM "&Calibrations", 705
+  MENUITEM "&Statics summary", 706
+ }
+
+
+ POPUP "str&Ingers"
+ {
+  MENUITEM "&Add stringers", 801
+  MENUITEM "&Delete stringers", 802
+  MENUITEM "&Plate development", 803
+  MENUITEM "&Plot stringer rulings", 804
+  MENUITEM "&Undo stringer ruling", 805
+  MENUITEM "&Rollout stringer", 806
+  MENUITEM "&Write to file", 807
+ }
+#endif
+
+#ifdef EXT_OR_PROF
+ MENUITEM "s&Urfaces", 901
+#endif
+
+#ifdef HULLSTAT
+ MENUITEM "&Hullstat", 1301
+#endif
+
+#ifdef PROF
+ POPUP "&Run"
+ {
+  MENUITEM "&Add program", 1001
+  MENUITEM "&Delete program", 1002
+ }
+#endif
+
+ POPUP "&Configure"
+ {
+#ifdef EXT_OR_PROF
+  MENUITEM "&Plotter", 1101
+#endif
+  MENUITEM "&Scale", 1102
+  MENUITEM "printer fo&Nt", 1103
+  MENUITEM SEPARATOR
+  MENUITEM "&File directories", 1104
+  MENUITEM SEPARATOR
+  MENUITEM "&Units", 1105
+  MENUITEM "&Density of water", 1106
+  MENUITEM SEPARATOR
+  MENUITEM "&X-positive direction", 1107
+  MENUITEM "&Z-positive direction", 1108
+  POPUP "&Graphics"
+  {
+   MENUITEM "&Mode", 1109
+   MENUITEM "&Colours", 1110
+   MENUITEM "line st&Yles", 1111
+  }
+
+  MENUITEM "&Extra drawing points", 1112
+  MENUITEM "screen f&Ont", 1113
+  MENUITEM "&View on open", 1114
+  MENUITEM "edit &Mode", 1115
+  POPUP "&Toolbar"
+  {
+   MENUITEM "&Add item", 1116
+   MENUITEM "&Delete item", 1117
+   MENUITEM "&Locate toolbar", 1118
+   MENUITEM "&Arrange items", 1119
+   MENUITEM "&Hints", 1120
+  }
+#ifdef linux
+  MENUITEM "&Browser", 1123
+#endif
+  MENUITEM "&Lines, text-edit", 1124
+  MENUITEM "l&Imits for floating point", 1125
+  MENUITEM SEPARATOR
+  MENUITEM "&Write configuration", 1121
+  MENUITEM "&Read configuration", 1122
+ }
+
+ POPUP "&Help"
+ {
+  MENUITEM "&Contents", 1201
+  MENUITEM "&Using help", 1202
+  MENUITEM SEPARATOR
+  MENUITEM "&About Hullform", 1203
+  MENUITEM "&Memory usage", 1204
+  MENUITEM SEPARATOR
+  MENUITEM "&What's new", 1205
+  MENUITEM "&Tutorial", 1206
+  MENUITEM "&Web site", 1207
+ }
+}
+
+#ifndef SHAREWARE
+#ifndef FREEWARE
+
+SHADEVIEW MENU
+{
+ MENUITEM "&Close", 2001
+}
+
+#endif
+#endif
+
+HULLSMMI_MEN MENU
+{
+ MENUITEM "&Smo", 101
+ MENUITEM "&Pul", 102
+ MENUITEM "&Fol", 103
+ MENUITEM "&Rdr", 104
+ MENUITEM "&Val", 105
+ MENUITEM "&Crv", 106
+ MENUITEM "&Ign", 107
+ MENUITEM "&Als", 108
+ MENUITEM "&Und", 109
+ MENUITEM "&Mas", 110
+ MENUITEM "f&Lx", 111
+ MENUITEM "&Hlf", 112
+ MENUITEM "&Dou", 113
+ MENUITEM "pr&O", 114
+ MENUITEM "&Qui", 115
+}
+
+HULLSMOO_MEN MENU
+{
+ MENUITEM "&Smoo", 101
+ MENUITEM "&Pull", 102
+ MENUITEM "&Foll", 103
+ MENUITEM "&Redr", 104
+ MENUITEM "&Valu", 105
+ MENUITEM "&Curv", 106
+ MENUITEM "&Igno", 107
+ MENUITEM "&Also", 108
+ MENUITEM "&Undo", 109
+ MENUITEM "&Mast", 110
+ MENUITEM "f&Lex", 111
+ MENUITEM "&Half", 112
+ MENUITEM "&Doub", 113
+ MENUITEM "pr&Op", 114
+ MENUITEM "&Quit", 115
+}
+
+HULLSMEX_MEN MENU
+{
+ MENUITEM "&Smooth", 101
+ MENUITEM "&Pull", 102
+ MENUITEM "&Follow", 103
+ MENUITEM "&Redraw", 104
+ MENUITEM "&Value", 105
+ MENUITEM "&Curve", 106
+ MENUITEM "&Ignore", 107
+ MENUITEM "&Also", 108
+ MENUITEM "&Undo", 109
+ MENUITEM "&Master", 110
+ MENUITEM "f&Lexibility", 111
+ MENUITEM "&Half", 112
+ MENUITEM "&Double", 113
+ MENUITEM "pr&Operties", 114
+ MENUITEM "&Quit", 115
+}
+
+EDITGREX_MEN MENU
+{
+ MENUITEM "&Offset", 101
+ MENUITEM "&Control", 102
+ MENUITEM "&Follow", 103
+ MENUITEM "&Double", 104
+ MENUITEM "&Half", 105
+ MENUITEM "&Redraw", 106
+ MENUITEM "&Edit", 107
+ MENUITEM "&Show", 108
+ MENUITEM "&Undo", 109
+#ifdef PROF
+ MENUITEM "&Zoom", 110
+#endif
+ MENUITEM "&Text-Edit", 111
+ MENUITEM "ce&Ntre", 112
+ MENUITEM "&Master", 113
+ MENUITEM "&Bitmap", 115
+ MENUITEM "&Quit", 114
+}
+
+EDITGRAP_MEN MENU
+{
+ MENUITEM "&Offs", 101
+ MENUITEM "&Cont", 102
+ MENUITEM "&Foll", 103
+ MENUITEM "&Doub", 104
+ MENUITEM "&Half", 105
+ MENUITEM "&Redr", 106
+ MENUITEM "&Edit", 107
+ MENUITEM "&Show", 108
+ MENUITEM "&Undo", 109
+#ifdef PROF
+ MENUITEM "&Zoom", 110
+#endif
+ MENUITEM "&Text", 111
+ MENUITEM "ce&Nt", 112
+ MENUITEM "&Mast", 113
+ MENUITEM "&Bitm", 115
+ MENUITEM "&Quit", 114
+}
+
+VIEWOPTI DIALOG 14, 23, 248, 187
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Set Viewing Options"
+{
+ LTEXT "&Lines to plot", DLGTEXT +0, 6, 5, 53, 8
+ EDITTEXT DLGEDIT +0, 65, 3, 90, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ LTEXT "&Sections to plot", DLGTEXT +1, 6, 19, 53, 8
+ EDITTEXT DLGEDIT +1, 65, 17, 90, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+#ifdef PROF
+ CHECKBOX "&Tanks",          DLGLOG +0, 10, 31, 63, 10
+ CHECKBOX "strin&Gers",      DLGLOG +1, 10, 41, 63, 10
+#endif
+ CHECKBOX "&Frame outlines", DLGLOG +2, 10, 51, 60, 10
+ PUSHBUTTON "... frame &Details", DLGPBF +0, 83, 49, 72, 12
+ CHECKBOX "section &Numbers",DLGLOG +3, 10, 61, 70, 10
+ CHECKBOX "section na&Mes",  DLGLOG +4, 10, 71, 60, 10
+ CHECKBOX "c&Entres",        DLGLOG +5, 10, 81, 44, 10
+#ifdef EXT_OR_PROF
+ CHECKBOX "o&Verlay",        DLGLOG +6, 83, 71, 34, 12
+#ifdef PROF
+ CHECKBOX "&DXF lines",      DLGLOG +7,83, 81, 50, 12
+#endif
+#endif
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 105, 155, 58
+ CHECKBOX "- &Plot waterlines from DWL", DLGLOG + 8, 56, 108, 97, 10, BS_CHECKBOX | BS_LEFTTEXT | WS_TABSTOP
+ RADIOBUTTON "&Waterlines", DLGRBN1 +0, 6, 108, 48, 10
+ RADIOBUTTON "&Buttocks", DLGRBN1 +1, 6, 120, 51, 10
+ RADIOBUTTON "d&Iagonals", DLGRBN1 +2, 6, 134, 59, 10
+ RADIOBUTTON "&None of these", DLGRBN1 +3, 6, 147, 55, 10
+ LTEXT "plot &Interval", DLGTEXT +2, 77, 127, 41, 8
+ EDITTEXT DLGEDIT +2, 118, 125, 35, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "diagonal &Angle", DLGTEXT +3, 68, 141, 50, 8
+ EDITTEXT DLGEDIT +3, 118, 139, 35, 12, WS_BORDER | WS_TABSTOP
+
+#ifdef EXT_OR_PROF
+ CTEXT "Viewing mode:", -1,162, 8, 76, 8
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE,162, 4, 81, 48
+ RADIOBUTTON "o&Utline", DLGRBN2 +0,    174, 20, 37, 9
+ RADIOBUTTON "&Shaded", DLGRBN2 +1,     174, 30, 38, 9
+ RADIOBUTTON "&Both modes", DLGRBN2 +2, 174, 40, 49, 9
+
+ CTEXT "Illumination angles:", -1,      162, 58, 81, 8
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 162,56, 81, 45
+ LTEXT "&Azimuth",DLGTEXT+4,  167, 72, 30, 8
+ EDITTEXT DLGEDIT +4,         203, 70, 35, 12
+ LTEXT "&Elevation",DLGTEXT+5,167, 88, 30, 8
+ EDITTEXT DLGEDIT +5,         203, 86, 35, 12
+#endif
+
+ CTEXT "Viewing position:", -1,      162,107, 81, 8
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 162,105, 81, 58
+ LTEXT "&Azimuth",DLGTEXT+6,    167,120, 34, 8
+ EDITTEXT DLGEDIT+6,            203,118, 35, 12
+ LTEXT "&Y-position",DLGTEXT+7, 167,134, 34, 8
+ EDITTEXT DLGEDIT+7,            203,132, 35, 12
+ LTEXT "&Z-position",DLGTEXT+8, 167,148, 34, 8
+ EDITTEXT DLGEDIT+8,            203,146, 35, 12
+
+ DEFPUSHBUTTON "&Ok",  IDOK,      54, 168, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 104, 168, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   154, 168, 40, 14
+}
+
+BUILDERS DIALOG 105, 34, 155, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Write Frame Offsets"
+{
+ LTEXT "&Interval on curves", DLGTEXT +0, 6, 4, 61, 8
+ EDITTEXT DLGEDIT +0, 110, 3, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Decimal places", DLGTEXT +1, 6, 18, 58, 8
+ EDITTEXT DLGEDIT +1, 110, 17, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Sections to write", DLGTEXT +2, 6, 38, 36, 15
+ EDITTEXT DLGEDIT +2, 82, 39, 67, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+#ifdef PROF
+ CHECKBOX "strin&Gers", DLGLOG +0, 6, 56, 41, 10
+#endif
+ CHECKBOX "&Frame outlines ....", DLGLOG +1, 6, 66, 68, 10
+ PUSHBUTTON "&Details", DLGPBF +0, 93, 64, 54, 12
+ PUSHBUTTON "&Browse",  DLGPBF +1, 93, 83, 54, 12
+ LTEXT "file &Name ...", -1, 6, 91, 51, 8
+ EDITTEXT               DLGEDIT+3,  6,102, 143, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "+", DLGINC, 100, 15, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 100, 25, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,  11, 119, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  57, 119, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 103, 119, 40, 14
+}
+
+#ifdef EXT_OR_PROF
+
+DXFOUTP DIALOG 19, 49, 174, 200
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "DXF file options"
+{
+ CTEXT "Layer Selection", -1, 17, 4, 60, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 6, 15, 81, 40
+ LTEXT "layer limit", DLGTEXT +0, 9, 20, 36, 8
+ EDITTEXT DLGEDIT +0, 60, 19, 16, 12, WS_BORDER | WS_TABSTOP
+ RADIOBUTTON "&Labels", DLGRBN1 +0, 11, 32, 51, 8
+ RADIOBUTTON "&Numbers", DLGRBN1 +1, 11, 42, 52, 9
+ PUSHBUTTON "+", DLGINC, 50, 16, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 50, 26, 7, 7
+
+ CTEXT "Output Format", -1,107, 4, 57, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE,102, 15, 66, 40
+ RADIOBUTTON "&2-d output", DLGRBN2 +0,111, 21, 42, 10
+ RADIOBUTTON "&3-d output", DLGRBN2 +1,111, 37, 43, 10
+
+#ifdef PROF
+ LTEXT "Output options:", -1,                7, 57, 60, 8
+ CHECKBOX "&Tanks",               DLGLOG +0, 6, 66, 63, 10
+ CHECKBOX "&Stringers",           DLGLOG +1, 6, 76, 63, 10
+#else
+ LTEXT "Output options:", -1,                7, 77, 60, 8
+#endif
+ CHECKBOX "&Frame outlines..", DLGLOG +2, 6, 86, 68, 10
+ PUSHBUTTON "... d&Etails",       DLGPBF +0,84, 83, 40, 12
+ CHECKBOX "&Waterlines, interval",DLGLOG +3, 6, 100, 78, 10
+ EDITTEXT DLGEDIT +1, 84, 101, 30, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ CHECKBOX "&Plot from DWL",       DLGLOG + 4, 20, 109, 56, 10
+ CHECKBOX "&Buttocks, interval",  DLGLOG +5, 6,120, 70, 10
+ EDITTEXT DLGEDIT +2, 84, 120, 30, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ CHECKBOX "&Diagonals, interval", DLGLOG +6, 6,132, 72, 10
+ EDITTEXT DLGEDIT +3, 84, 132, 30, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&Angle", -1, 118, 132, 30, 8
+ EDITTEXT DLGEDIT +4,138, 132, 30, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ LTEXT "&File name",               -1, 6, 155, 40, 8
+ PUSHBUTTON "b&Rowse ...", DLGPBF +1,113, 147, 54, 12
+ EDITTEXT                  DLGEDIT +5, 6, 165, 162, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ DEFPUSHBUTTON "&Ok", IDOK,      17, 180, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 67, 180, 40, 14
+ PUSHBUTTON "&Help", IDHELP,    117, 180, 40, 14
+}
+
+DXFFRAMES DIALOG 19, 49, 148, 108
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "DXF Frame Output"
+{
+ LTEXT "&Sections to write",      DLGTEXT +0,  4, 6, 60, 8
+ EDITTEXT                         DLGEDIT +0, 68, 4, 76, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ CHECKBOX "plot &Both sides",     DLGLOG + 0,  4,20, 60,10
+ CHECKBOX "frame &Outlines ...",  DLGLOG + 1,  4,32, 70,10
+ CHECKBOX "s&Tringers",           DLGLOG + 2,  4,44, 63,10
+ PUSHBUTTON "&Details ...",       DLGPBF  +0, 90, 31, 50, 12
+ LTEXT "&File name pattern",      DLGTEXT +1,  4, 60, 60, 8
+ EDITTEXT                         DLGEDIT +1,  4, 70,140, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 88, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 88, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 88, 40, 14
+}
+
+DXFPLATES DIALOG 19, 49, 148, 68
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "DXF Plates Output"
+{
+ LTEXT "&File name pattern",      DLGTEXT +0,  4, 10, 60, 8
+ EDITTEXT                         DLGEDIT +0,  4, 20,140, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 38, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 38, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 38, 40, 14
+}
+
+#endif
+
+#ifdef PROF
+
+DXFINPUT DIALOG 19, 49, 236, 188
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "DXF File Input"
+FONT 9, "System"
+{
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE,4,4,228,68
+ LTEXT "Coordinates", -1,8,0,40,10
+ CHECKBOX "&Highest X at stem",       DLGLOG  +0,  8, 10, 80, 10
+ CHECKBOX "&Reverse Y offsets",       DLGLOG  +1,  8, 22, 80, 10
+ LTEXT "&Y-coordinate at zero plane:",DLGTEXT +0,  8, 34, 90, 10
+ RADIOBUTTON "min",                   DLGRBN1 +0,  8, 44, 30, 10
+ RADIOBUTTON "max",                   DLGRBN1 +1, 38, 44, 30, 10
+ RADIOBUTTON "value:",                DLGRBN1 +2, 68, 44, 30, 10
+ EDITTEXT                             DLGEDIT +0,100, 43, 30, 12
+ CHECKBOX "&Invert Z offsets",        DLGLOG  +2,  8, 56, 80, 10
+
+ LTEXT "1x, 2x, 3x items represent:",-1,135,12,90,12, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "X, Y, Z", DLGRBN2 +0, 140,22, 40, 10
+ RADIOBUTTON "X, Z, Y", DLGRBN2 +1, 140,32, 40, 10
+ RADIOBUTTON "Y, Z, X", DLGRBN2 +2, 140,42, 40, 10
+ RADIOBUTTON "Y, X, Z", DLGRBN2 +3, 185,22, 40, 10
+ RADIOBUTTON "Z, X, Y", DLGRBN2 +4, 185,32, 40, 10
+ RADIOBUTTON "Z, Y, X", DLGRBN2 +5, 185,42, 40, 10
+ PUSHBUTTON "&Prescan", DLGPBF  +1, 140,54, 80, 14
+
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE,4,78,228,35
+ LTEXT "Shape Controls", -1,8,74,50,10
+ CHECKBOX "&Allow curvature  -  OR  -",DLGLOG  +3,  8, 84, 90,10
+ CHECKBOX "&Edit section positions",   DLGLOG  +4,  8, 97, 90,10
+ LTEXT "&Points between chines",       DLGTEXT +1,100, 85, 90,10
+ EDITTEXT                              DLGEDIT +1,184, 83, 40,12
+ LTEXT "&Minimum angle at chine",      DLGTEXT +2,100, 98, 90,10
+ EDITTEXT                              DLGEDIT +2,184, 97, 40,12
+
+ LTEXT "&File name ...",              DLGTEXT +3,  4,118, 60,10
+ EDITTEXT                             DLGEDIT +3,  4,134,228,12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "... &Browse",            DLGPBF  +0,180,117, 50,12
+
+ CHECKBOX "&Show DXF lines on hull views", DLGLOG+5,65,150,196,14
+ DEFPUSHBUTTON "&Ok",  IDOK,     48, 168, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 98, 168, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  148, 168, 40, 14
+}
+
+DXFPOSITIONS DIALOG 18, 18, 152, 116
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Edit Section Positions"
+{
+ LTEXT "Current Positions", 105,             6, 2, 60, 8
+ LISTBOX DLGLBX +0,                          6, 13, 60, 80, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ PUSHBUTTON "&Delete selection", DLGPBF +0, 70, 30, 70, 14
+ PUSHBUTTON "&Add:", DLGPBF +1,             70, 57, 30, 14
+ EDITTEXT DLGEDIT +0,                      105, 57, 30, 14, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK,                  6, 97, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL,            56, 97, 40, 14
+ PUSHBUTTON "&Help", IDHELP,               156, 97, 40, 14
+}
+
+FRAME DIALOG 60, 33, 256, 92
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Frame Element Details"
+FONT 9, "System"
+{
+ LTEXT "&Hole radius", DLGTEXT +0, 4, 16, 50, 8
+ EDITTEXT DLGEDIT +0, 60, 14, 40, 12
+ LTEXT "notch &Width", DLGTEXT +1, 4, 34, 50, 8
+ EDITTEXT DLGEDIT +1, 60, 32, 40, 12
+ LTEXT "notch &Height", DLGTEXT +2, 4, 52, 50, 8
+ EDITTEXT DLGEDIT +2, 60, 50, 40, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 3, 73, 30, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 39, 73, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 75, 73, 30, 14
+ LISTBOX DLGLBX +0, 112, 15, 80, 73, LBS_STANDARD | LBS_MULTIPLESEL
+ EDITTEXT DLGEDIT +3, 200, 38, 50, 14
+ PUSHBUTTON "<-- &Alter", DLGPBF +0, 200, 55, 50, 14
+ LTEXT "&New thickness", DLGTEXT +3, 200, 27, 52, 8
+ LTEXT "Skin Thicknesses:", -1, 120, 4, 60, 8
+}
+
+#else
+
+FRAME DIALOG 60, 33, 256, 92
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Frame Element Details"
+FONT 9, "System"
+{
+ LISTBOX DLGLBX +0, 112, 15, 80, 73, LBS_STANDARD | LBS_MULTIPLESEL
+ EDITTEXT DLGEDIT +3, 200, 38, 50, 14
+ PUSHBUTTON "<-- &Alter", DLGPBF +0, 200, 55, 50, 14
+ LTEXT "&New thickness", DLGTEXT +3, 200, 27, 52, 8
+ LTEXT "Skin Thicknesses:", -1, 120, 4, 60, 8
+ DEFPUSHBUTTON "&Ok", IDOK, 3, 73, 30, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 39, 73, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 75, 73, 30, 14
+}
+
+#endif
+
+LOADVIEW DIALOG 101, 42, 148, 110
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+
+CAPTION "View Displayed on Opening a File"
+FONT 9, "System"
+{
+ RADIOBUTTON "&Blank screen",          DLGRBN1 +0, 33, 6, 60, 12
+ RADIOBUTTON "&General orthogonal",    DLGRBN1 +1, 33, 16, 81, 12
+ RADIOBUTTON "&Top view",              DLGRBN1 +2, 33, 26, 60, 12
+ RADIOBUTTON "&Elevation",             DLGRBN1 +3, 33, 36, 60, 12
+ RADIOBUTTON "e&Nd elevation",         DLGRBN1 +4, 33, 46, 60, 12
+ RADIOBUTTON "&Full perspective",      DLGRBN1 +5, 33, 56, 60, 12
+ RADIOBUTTON "&Port perspective",      DLGRBN1 +6, 33, 66, 66, 12
+ RADIOBUTTON "&Starboard perspective", DLGRBN1 +7, 31, 76, 83, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 92, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 92, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 92, 40, 14
+}
+
+EDITDELE DIALOG 22, 69, 353, 130
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Delete a Section"
+{
+ LTEXT "Select a section to delete:", -1, 25, 2, 86, 8
+ LISTBOX DLGLBX +0, 25, 12, 87, 96, LBS_NOTIFY | LBS_USETABSTOPS | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ CONTROL "", 300, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 148, 11, 200, 112
+ LTEXT "... or click on the section to delete:", -1, 148, 2, 114, 8
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 112, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 112, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 112, 40, 14
+}
+
+GETLINE DIALOG 85, 49, 148, 48
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_VISIBLE
+CAPTION "Index List Entry"
+{
+ CTEXT "<replaced by caller>", DLGSTAT +0, 6, 2, 131, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +0, 4, 13, 140, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,  4, 30, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 30, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104, 30, 40, 14
+}
+
+A_YACHT ICON DISCARDABLE "hf9-64-1.ico"
+B_WORKBOAT ICON DISCARDABLE "workboat.ico"
+C_PILOT ICON DISCARDABLE "pilot.ico"
+D_YACHT ICON DISCARDABLE "hf9.ico"
+
+TOOL_UP_BMP BITMAP DISCARDABLE "tool_up.bmp"
+
+TOOL_DN_BMP BITMAP DISCARDABLE "tool_dn.bmp"
+
+TBOUTL CURSOR DISCARDABLE "tboutl.cur"
+
+MASTER DIALOG 133, 113, 148, 54
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Master Section Parameters"
+FONT 9, "System"
+{
+ CTEXT "&Master section indices", DLGTEXT +0, 4, 4, 140, 8
+ EDITTEXT DLGEDIT +0, 4, 14, 140, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK,  4, 34, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 34, 40, 14
+ PUSHBUTTON "&Help", IDHELP, 104, 34, 40, 14
+}
+
+LINEPROP DIALOG 74, 35, 242, 142
+STYLE WS_POPUP | WS_CAPTION | WS_THICKFRAME
+CAPTION "Line Properties"
+FONT 9, "System"
+{
+ CTEXT "Text", DLGSTAT +0, 71, 1, 100, 8
+#ifdef PROF
+ LTEXT "&Initial section", DLGTEXT +0, 4, 11, 45, 8
+ EDITTEXT DLGEDIT +0, 50, 10, 16, 12
+ LTEXT "la&St section", DLGTEXT +1, 4, 24, 41, 8
+ EDITTEXT DLGEDIT +1, 51, 22, 16, 12
+#endif
+ LTEXT "Lateral control point location:", -1, 4, 40, 47, 17
+ CONTROL "a&Bsolute", DLGRBN1 +0, "BUTTON", BS_AUTORADIOBUTTON | WS_TABSTOP, 52, 37, 40, 12
+ CONTROL "&Relative", DLGRBN1 +1, "BUTTON", BS_AUTORADIOBUTTON | WS_TABSTOP, 52, 49, 40, 12
+ CHECKBOX "fair &Automatically", DLGLOG +0, 3, 62, 84, 12, BS_CHECKBOX | BS_LEFTTEXT | WS_TABSTOP
+ PUSHBUTTON "Inter-Section &Flexibility", DLGPBF +0, 4, 77, 84, 12
+ PUSHBUTTON "&Straighten curvature",      DLGPBF +1, 4, 96, 83, 12
+ LTEXT "&Master sections (all lines)", DLGTEXT +10,  4, 114, 84, 8
+ EDITTEXT DLGEDIT +10, 4, 123, 84, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ CTEXT "End Curve Factors",         -1, 160, 15, 68, 12
+ CTEXT "BOW",                       -1, 160, 26, 32, 12
+ CTEXT "STERN",                     -1, 196, 26, 32, 12
+
+ LTEXT "&Lateral Offset",   DLGTEXT +2, 104, 40, 60, 12
+ EDITTEXT                   DLGEDIT +2, 160, 38, 32, 12
+ EDITTEXT                   DLGEDIT +3, 196, 38, 32, 12
+
+ LTEXT "&Vertical Offset",  DLGTEXT +4, 104, 59, 60, 12
+ EDITTEXT                   DLGEDIT +4, 160, 57, 32, 12
+ EDITTEXT                   DLGEDIT +5, 196, 57, 32, 12
+
+ LTEXT "L&ateral Control",  DLGTEXT +6, 104, 76, 60, 12
+ EDITTEXT                   DLGEDIT +6, 160, 74, 32, 12
+ EDITTEXT                   DLGEDIT +7, 196, 74, 32, 12
+
+ LTEXT "V&ertical Control", DLGTEXT +8, 104, 97, 60, 12
+ EDITTEXT                   DLGEDIT +8, 160, 95, 32, 12
+ EDITTEXT                   DLGEDIT +9, 196, 95, 32, 12
+
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE,  96, 10, 140, 106
+ DEFPUSHBUTTON "&Ok",  IDOK,      96, 120, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 146, 120, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   196, 120, 40, 14
+}
+
+CONFCOLO DIALOG 37, 49, 140, 208
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Class for Colour Definition"
+{
+ PUSHBUTTON "&Window background", DLGPBF +0, 4, 4, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Text", DLGPBF +1, 4, 24, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "s&Ections", DLGPBF +2, 4, 44, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Lines", DLGPBF +3, 4, 64, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Waterlines", DLGPBF +4, 4, 84, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Buttocks", DLGPBF +5, 4, 104, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Diagonals", DLGPBF +6, 4, 124, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Shading highlight", DLGPBF +7, 4, 144, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "sh&Ading shadow", DLGPBF +8, 4, 164, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "o&Verlays", DLGPBF +9, 4, 184, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ CHECKBOX "s&Olid shades", DLGLOG +0, 82, 123, 53, 10
+ DEFPUSHBUTTON "&Ok", IDOK, 90, 57, 40, 14
+ PUSHBUTTON "&Help", IDHELP, 90, 82, 40, 14
+}
+
+EDITPROP DIALOG 119, 64, 124, 50
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Line Properties"
+FONT 9, "System"
+{
+ LTEXT "&Line number", DLGTEXT +0, 4, 9, 43, 8
+ EDITTEXT DLGEDIT +0, 62, 7, 20, 12
+ DEFPUSHBUTTON "&Edit", DLGPBF +0, 88, 6, 30, 14
+ PUSHBUTTON "+", DLGINC, 51, 5, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 51, 15, 7, 7
+ PUSHBUTTON "&Quit", IDCANCEL, 17, 30, 40, 14
+ PUSHBUTTON "&Help", IDHELP,   67, 30, 40, 14
+}
+
+HULLSMOO DIALOG 49, 53, 262, 108
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Smooth Hull Lines"
+{
+ LTEXT "line to &Use", 111, 95, 5, 37, 8
+ EDITTEXT DLGEDIT +0, 146, 3, 20, 12
+ PUSHBUTTON "&Lateral  offset", DLGPBF +0, 4, 31, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Vertical offset", DLGPBF +1, 4, 45, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "l&Ateral cont. offset", DLGPBF +2, 4, 59, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "v&Ertical cont.offset", DLGPBF +3, 4, 73, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "angle to &Prev line", DLGPBF +4, 91, 31, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "angle to &Next line", DLGPBF +5, 91, 45, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "angle to prev &Cont.", DLGPBF +6, 91, 59, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "angle to next c&Ont.", DLGPBF +7, 91, 73, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Distance to prev line", DLGPBF +8, 178, 31, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "d&Istance to next line", DLGPBF +9, 178, 45, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "di&Stance to prev cont.", DLGPBF +10, 178, 59, 80, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "dis&Tance to next cont.", DLGPBF +11, 178, 73, 80, 12
+ PUSHBUTTON "&Quit", IDCANCEL, 86, 91, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Help", IDHELP, 136, 91, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "+", DLGINC, 137, 4, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 137,11, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ CTEXT "Offsets", -1, 4, 20, 80, 8
+ CTEXT "Angles", -1, 91, 20, 80, 8
+ CTEXT "Distances", -1, 178, 20, 80, 8
+}
+
+
+#ifdef EXT_OR_PROF
+
+MERGEOVL DIALOG 68, 47, 200, 77
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Merge Main and Overlay Hull"
+FONT 9, "System"
+{
+ LTEXT "&Overlay hull", DLGTEXT +0, 18, 26, 41, 10
+ EDITTEXT DLGEDIT +0, 62, 24, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Main hull", DLGTEXT +1, 18, 41, 31, 10
+ EDITTEXT DLGEDIT +1, 62, 39, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "Interpolation Mode", -1, 117, 7, 63, 8
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 101, 2, 96, 54
+ CTEXT "Indices of intersecting surfaces (2 upward)", -1, 7, 3, 87, 16
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 2, 2, 96, 54
+ CHECKBOX "&Include overlay sections", DLGLOG +0, 104, 20, 89, 12, BS_CHECKBOX | BS_LEFTTEXT | WS_TABSTOP
+ CHECKBOX "merge to &Higher lines",    DLGLOG+1,  104, 36, 89, 12, BS_CHECKBOX | BS_LEFTTEXT | WS_TABSTOP
+
+ DEFPUSHBUTTON "&Ok",      IDOK,  30, 61, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  80, 61, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 130, 61, 40, 14
+}
+#endif
+
+WEIGHTS DIALOG 6, 15, 138, 129
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Change Inter-Section Flexibility"
+FONT 9, "System"
+{
+ LISTBOX DLGLBX +0, 6, 6, 66, 100, LBS_NOTIFY | WS_BORDER | LBS_MULTIPLESEL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ EDITTEXT DLGEDIT +0, 80, 29, 50, 12
+ PUSHBUTTON "&Change", DLGPBF +0, 80, 49, 50, 14
+ LTEXT "New value ...", -1, 81, 19, 44, 8
+ PUSHBUTTON "&Undo", DLGPBF +1, 80, 70, 50, 14
+ DEFPUSHBUTTON "&Done", IDOK, 24, 110, 40, 14
+ PUSHBUTTON "&Help",  IDHELP, 74, 110, 40, 14
+}
+
+EDITADD DIALOG 14, 81, 358, 156
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Create a New Section"
+{
+ LTEXT "&Position:", 111, 4, 106, 31, 8
+ EDITTEXT DLGEDIT +0, 59, 104, 43, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Ignore sections:", 112, 4, 124, 53, 10
+ EDITTEXT DLGEDIT +1, 59, 121, 89, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "Existing sections are:", -1, 27, 2, 80, 8
+ CONTROL "", 300, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 155, 11, 200, 141
+ LTEXT "Click where you want to add a section:", -1, 157, 2, 133, 8
+ LISTBOX DLGLBX +0, 27, 11, 103, 90, LBS_NOTIFY | WS_BORDER | LBS_USETABSTOPS | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      7, 138, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 57, 138, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  107, 138, 40, 14
+}
+
+INSERTLI DIALOG 70, 55, 256, 158
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Insert a new hull line"
+{
+ LTEXT "Insert before &Line number", 111, 4, 7, 42, 19
+ EDITTEXT DLGEDIT +0, 48, 10, 16, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Interpolate at:", DLGTEXT +3, 4, 27, 47, 8
+ EDITTEXT DLGEDIT +1, 24, 37, 40, 12, WS_BORDER | WS_TABSTOP
+#ifdef PROF
+ LTEXT "&Start section", 112, 4, 59, 41, 10
+ EDITTEXT DLGEDIT +2, 48, 57, 16, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&End section", 113, 4, 75, 39, 7
+ EDITTEXT DLGEDIT +3, 48, 73, 16, 12, WS_BORDER | WS_TABSTOP
+#endif
+ CONTROL "", 300, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 71, 12, 180, 142
+ DEFPUSHBUTTON "&Ok", IDOK, 17, 94, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 17, 113, 40, 14
+ PUSHBUTTON "&Help", IDHELP, 17, 132, 40, 14
+ LTEXT "Click a point where you want the line:", -1, 75, 2, 121, 8
+}
+
+#ifdef EXT_OR_PROF
+
+EDITNEWH DIALOG 6, 14, 212, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Initialise a New Hull Design or Hull Surface"
+{
+ LTEXT "number of &Lines", DLGTEXT +0, 2, 22, 67, 8
+ EDITTEXT DLGEDIT +0, 80, 20, 40, 12
+ LTEXT "o&Verall length", DLGTEXT +2, 2, 50, 76, 8
+ EDITTEXT DLGEDIT +1, 80, 34, 40, 12
+ LTEXT "number of &Sections", DLGTEXT+1, 2, 36, 65, 8
+ EDITTEXT DLGEDIT +2, 80, 48, 40, 12
+ LTEXT "&Maximum beam", DLGTEXT +3, 2, 64, 76, 8
+ EDITTEXT DLGEDIT +3, 80, 62, 40, 12
+ LTEXT "&Transom beam", DLGTEXT +4, 2, 78, 76, 8
+ EDITTEXT DLGEDIT +4, 80, 76, 40, 12
+ LTEXT "r&Ake of stem", DLGTEXT +5, 2, 92, 76, 8
+ EDITTEXT DLGEDIT +5, 80, 90, 40, 12
+ LTEXT "&Draft", DLGTEXT +6, 2, 106, 76, 8
+ EDITTEXT DLGEDIT +6, 80, 104, 40, 12
+ LTEXT "stem &Freeboard", DLGTEXT +7, 2, 120, 76, 8
+ EDITTEXT DLGEDIT +7, 80, 118, 40, 12
+ LTEXT "st&Ern freeboard", DLGTEXT +8, 2, 134, 76, 8
+ EDITTEXT DLGEDIT +8, 80, 132, 40, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 17, 83, 41
+ LTEXT "Hull Type", -1, 151, 20, 35, 8
+ RADIOBUTTON "&Yacht", DLGRBN1 +0, 150, 28, 40, 10
+ RADIOBUTTON "&Workboat", DLGRBN1 +1, 150, 39, 40, 10
+ RADIOBUTTON "&Planing", DLGRBN1 +2, 150, 48, 40, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 61, 82, 40
+ CTEXT "Section curvatures", -1, 137, 63, 63, 10, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "all ch&Ines", DLGRBN2 +0, 131, 71, 45, 10
+ RADIOBUTTON "all &Rounded", DLGRBN2 +1, 131, 80, 48, 10
+ RADIOBUTTON "specify i&Ndividually", DLGRBN2 +2, 131, 89, 73, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 104, 82, 31
+ CTEXT "Baseline position", -1, 136, 106, 61, 9
+ RADIOBUTTON "&Waterline", DLGRBN3 +0, 146, 114, 43, 10
+ RADIOBUTTON "&Keel", DLGRBN3 +1, 146, 123, 28, 10
+ LTEXT "Now in normal hull mode", DLGSTAT +0, 11, 3, 81, 10
+ PUSHBUTTON "c&Hange to surface mode", DLGPBF +0, 104, 2, 97, 12
+ DEFPUSHBUTTON "&Ok",      IDOK, 36, 150, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 86, 150, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,136, 150, 40, 14
+}
+
+#else
+
+EDITNEWH DIALOG 6, 14, 212, 168
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Initialise a New Hull Design"
+{
+ LTEXT "number of &Lines", DLGTEXT +0, 2, 22, 67, 8
+ EDITTEXT DLGEDIT +0, 80, 20, 40, 12
+ LTEXT "o&Verall length", DLGTEXT +2, 2, 50, 76, 8
+ EDITTEXT DLGEDIT +1, 80, 34, 40, 12
+ LTEXT "number of &Sections", DLGTEXT+1, 2, 36, 65, 8
+ EDITTEXT DLGEDIT +2, 80, 48, 40, 12
+ LTEXT "&Maximum beam", DLGTEXT +3, 2, 64, 76, 8
+ EDITTEXT DLGEDIT +3, 80, 62, 40, 12
+ LTEXT "&Transom beam", DLGTEXT +4, 2, 78, 76, 8
+ EDITTEXT DLGEDIT +4, 80, 76, 40, 12
+ LTEXT "r&Ake of stem", DLGTEXT +5, 2, 92, 76, 8
+ EDITTEXT DLGEDIT +5, 80, 90, 40, 12
+ LTEXT "&Draft", DLGTEXT +6, 2, 106, 76, 8
+ EDITTEXT DLGEDIT +6, 80, 104, 40, 12
+ LTEXT "stem &Freeboard", DLGTEXT +7, 2, 120, 76, 8
+ EDITTEXT DLGEDIT +7, 80, 118, 40, 12
+ LTEXT "st&Ern freeboard", DLGTEXT +8, 2, 134, 76, 8
+ EDITTEXT DLGEDIT +8, 80, 132, 40, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 17, 83, 41
+ LTEXT "Hull Type", -1, 151, 18, 35, 8
+ RADIOBUTTON "&Yacht", DLGRBN1 +0, 150, 27, 40, 10
+ RADIOBUTTON "&Workboat", DLGRBN1 +1, 150, 37, 40, 10
+ RADIOBUTTON "&Planing", DLGRBN1 +2, 150, 47, 40, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 61, 82, 40
+ CTEXT "Section curvatures", -1, 137, 63, 63, 10, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "all ch&Ines", DLGRBN2 +0, 131, 71, 45, 10
+ RADIOBUTTON "all &Rounded", DLGRBN2 +1, 131, 80, 48, 10
+ RADIOBUTTON "specify i&Ndividually", DLGRBN2 +2, 131, 89, 73, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 126, 104, 82, 31
+ CTEXT "Baseline position", -1, 136, 106, 61, 9
+ RADIOBUTTON "&Waterline", DLGRBN3 +0, 146, 114, 43, 10
+ RADIOBUTTON "&Keel", DLGRBN3 +1, 146, 123, 28, 10
+ DEFPUSHBUTTON "&Ok",      IDOK, 36, 150, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 86, 150, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,136, 150, 40, 14
+}
+
+#endif
+
+TOOLBAR DIALOG 38, 24, 214, 154
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Customise Tool Bar"
+{
+ CTEXT "&Select an icon:", DLGTEXT +0, 58, 2, 96, 8
+#ifndef linux
+ LISTBOX DLGLBX +0, 8, 12, 196, 22, LBS_NOTIFY | LBS_OWNERDRAWFIXED | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_TABSTOP
+#else
+ PUSHBUTTON "<", DLGPBF+0, 84, 16, 14, 14
+ PUSHBUTTON ">", DLGPBF+1, 116, 16, 14, 14
+#endif
+ CTEXT "Select a Main menu, menu (and submenu if needed) item:", -1, 8, 38, 196, 8
+ CONTROL "&Main Menu", DLGTEXT +1, "STATIC", SS_LEFTNOWORDWRAP | WS_CHILD | WS_VISIBLE | WS_GROUP, 8, 47, 37, 8
+ LISTBOX DLGLBX +1, 8, 57, 48, 57, LBS_NOTIFY | LBS_HASSTRINGS | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL
+ LTEXT "Menu &Item", DLGTEXT +2, 66, 47, 37, 8
+ LISTBOX DLGLBX +2, 66, 57, 64, 57, LBS_NOTIFY | LBS_HASSTRINGS | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL
+ LTEXT "&Submenu item", -1, 140, 47, 60, 8
+ LISTBOX DLGLBX +3, 140, 57, 64, 57, LBS_NOTIFY | WS_BORDER | LBS_HASSTRINGS | WS_BORDER | WS_VSCROLL
+ LTEXT "hint &Text (max 32 char)", DLGTEXT +3, 6, 119, 77, 8
+ EDITTEXT DLGEDIT +0, 82, 117, 118, 12, WS_BORDER | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Ok",     IDOK,     37, 135, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 87, 135, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  137, 135, 40, 14
+}
+
+TOOLDEL DIALOG 38, 24, 148, 67
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Customise Tool Bar - Delete Item"
+{
+ CTEXT "Press the icon of the Tool Bar Item to be deleted", DLGTEXT +0, 26, 2, 96, 16
+ LISTBOX DLGLBX +0, 6, 21, 135, 21, LBS_NOTIFY | LBS_OWNERDRAWFIXED | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_TABSTOP
+ PUSHBUTTON "&Ok",     IDOK,      4, 48, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 48, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 48, 40, 14
+}
+
+SELBUTTON DIALOG 62, 51, 264, 92
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "Select a Toolbar Icon"
+FONT 9, "System"
+{
+ DEFPUSHBUTTON "&Ok",      IDOK,  97, 73, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 137, 73, 40, 14
+}
+
+TBHINT DIALOG 6, 24, 80, 9
+STYLE WS_POPUP | WS_VISIBLE | WS_BORDER
+FONT 9, "System"
+{
+ LTEXT "Text", DLGTEXT +0, 2, 1, 80, 12, SS_NOPREFIX | WS_GROUP
+}
+
+ABOUT DIALOG 50, 76, 132, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "About HULLFORM"
+FONT 10, "System"
+{
+ ICON "C_PILOT", -1, 5, 5, 16, 16, WS_CHILD | WS_VISIBLE
+ ICON "A_YACHT", -1, 110, 5, 16, 16, WS_CHILD | WS_VISIBLE
+#ifdef linux
+ CTEXT "Hullform for Linux", -1, 30, 4, 72, 8
+#else
+ CTEXT "Hullform for Windows", -1, 30, 4, 72, 8
+#endif
+#ifdef HULLSTAT
+ CTEXT "Professional + Hullstat", -1, 25, 12, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#else
+#ifdef PROF
+ CTEXT "Professional", -1, 25, 12, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#else
+#ifdef PLATEDEV
+ CTEXT "Student Plate Extended", -1, 20, 12, 92, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#else
+#ifdef EXT
+ CTEXT "Student Extended", -1, 25, 12, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#else
+#ifdef FREEWARE
+ CTEXT "Freeware", -1, 25, 12, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#else
+ CTEXT "Student", -1, 25, 12, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#endif
+#endif
+#endif
+#endif
+#endif
+ CTEXT "Version 9", DLGSTAT + 0, 21,20, 90, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ CTEXT "-",DLGSTAT +1,21,28,90,8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#ifdef DEMO
+ CTEXT "Demonstration Version", -1, 25, 36, 82, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+#endif
+ CTEXT "Copyright 1988-2010", -1, 30, 46, 72, 8
+ CTEXT "BLUE PETER", -1, 40, 54, 52, 8
+ CTEXT "Marine Systems", -1, 25, 62, 82, 8
+ DEFPUSHBUTTON "&Ok", IDOK, 46, 75, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+}
+
+CONFUNIT DIALOG 107, 84, 148, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Select Measurement Units"
+{
+ RADIOBUTTON "&M and kg",        DLGRBN1 +0, 42,  5, 64, 10
+ RADIOBUTTON "m and &Tonne",     DLGRBN1 +1, 42, 17, 64, 10
+ RADIOBUTTON "&Feet and pounds", DLGRBN1 +2, 42, 29, 64, 10
+ RADIOBUTTON "feet and to&N",    DLGRBN1 +3, 42, 41, 64, 10
+ CHECKBOX "show &Inches when using feet", DLGLOG +0, 22, 57, 104, 12, BS_AUTOCHECKBOX | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 76, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 76, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 76, 40, 14
+}
+
+TOOLHINT DIALOG 77, 39, 148, 53
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Toolbar Hint Properties"
+FONT 9, "System"
+{
+ LTEXT "&Delay (seconds)", DLGTEXT +0, 29, 8, 57, 10
+ EDITTEXT DLGEDIT +0, 99, 7, 20, 12
+ CTEXT "Enter 0 to disable toolbar hints.", -1, 4, 23, 140, 8
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 36, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 36, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 36, 40, 14
+}
+
+#ifdef EXT_OR_PROF
+
+SURFACE DIALOG 39, 23, 228, 201
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Multiple Surfaces"
+FONT 9, "System"
+{
+ PUSHBUTTON "&New", DLGPBF +0, 5, 3, 50, 12
+ PUSHBUTTON "&Open", DLGPBF +1, 61, 3, 50, 12
+ PUSHBUTTON "&Save", DLGPBF +2, 117, 3, 50, 12
+ PUSHBUTTON "save &As ...", DLGPBF +3, 173, 3, 50, 12
+ PUSHBUTTON "&Main hull:", DLGPBF +4, 9, 21, 38, 12
+ RTEXT "(undefined)", DLGSTAT +0, 50, 23, 165, 10
+ PUSHBUTTON "&Edit main", DLGPBF +5, 9, 35, 38, 12
+ LISTBOX DLGLBX +0, 5, 54, 218, 83, LBS_NOTIFY | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ LTEXT "Move selection:", -1, 23, 139, 53, 8
+ PUSHBUTTON "&Up", DLGPBF +6, 79, 138, 30, 12
+ PUSHBUTTON "&Down", DLGPBF +7, 119, 138, 30, 12
+ PUSHBUTTON "add a s&Urface file", DLGPBF +8, 29, 153, 80, 12
+ PUSHBUTTON "&Remove selection", DLGPBF +9, 119, 153, 80, 12
+ PUSHBUTTON "merging &Parameters", DLGPBF +10, 29, 168, 80, 12, BS_LEFTTEXT | WS_TABSTOP
+ PUSHBUTTON "&Edit selection", DLGPBF +11, 119, 168, 80, 12
+ PUSHBUTTON "me&Rge", DLGPBF +12, 29, 185, 50, 12
+ DEFPUSHBUTTON "&Quit", IDCANCEL, 89, 185, 50, 12
+ PUSHBUTTON "&Help", IDHELP, 149, 185, 50, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 5, 19, 218, 30
+}
+
+#endif
+
+#ifndef linux
+
+DIREEDIT DIALOG 80, 61, 237, 202
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_VISIBLE
+CAPTION "Direct Section Edit"
+FONT 9, "System"
+{
+ LTEXT "&Section",        211,   4, 4, 26, 8
+ EDITTEXT                 105,  43, 2, 16, 12
+ LTEXT "&Position",       212,  60, 4, 29, 8
+ EDITTEXT                 202,  89, 2, 32, 12
+ LTEXT "&Name",           215, 128, 4, 19, 8
+ EDITTEXT                 205, 150, 2, 32, 12
+ LTEXT "OFFSETS",          -1, 58, 16, 31, 8
+ CTEXT "CONTROL POINTS",   -1, 135,16, 81, 8
+ CTEXT "Lateral",          -1,  39,24, 23, 8
+ CTEXT "Vertical",         -1,  88,24, 25, 8
+ LTEXT "Lateral - Rel/Abs",-1, 139,24, 58, 8
+ CTEXT "Vertical",         -1, 199,24, 27, 8
+ PUSHBUTTON "&Back",      203,   3, 18, 24, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Forw.",     204,   3,183, 24, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",    IDOK, 45, 185, 40, 14
+ PUSHBUTTON "&Cancel",IDCANCEL, 90, 185, 40, 14
+ PUSHBUTTON "&Help",   IDHELP, 135, 185, 40, 14
+ PUSHBUTTON "&Undo",      198, 190, 185, 40, 14
+ PUSHBUTTON "+",       DLGINC, 31, 2, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-",       DLGDEC, 31, 11, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+
+}
+
+#endif
+
+SMOOEXIT DIALOG 88, 83, 148, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Change"
+FONT 9, "System"
+{
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 4,  4, 68, 54
+ CTEXT "Movement direction", -1,           5,  8,  66, 15, WS_CHILD | WS_VISIBLE
+ RADIOBUTTON "&Vertical",      DLGRBN1 +0,18, 20, 49, 10
+ RADIOBUTTON "&Lateral",       DLGRBN1 +1,18, 32, 49, 10
+ RADIOBUTTON "&Radial",        DLGRBN1 +2,18, 44, 48, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 76, 4, 68, 54
+ CTEXT "Line to be moved",   -1,           77,  8, 66, 15, WS_CHILD | WS_VISIBLE
+ RADIOBUTTON "&This line",     DLGRBN2 +0, 84, 24, 56, 11
+ RADIOBUTTON "&Previous line", DLGRBN2 +1, 84, 36, 56, 11
+ DEFPUSHBUTTON "&Ok",      IDOK,  4, 63, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 63, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104, 63, 40, 14
+}
+
+GRAPHICS DIALOG 120, 99, 148, 44
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Graphics Model"
+FONT 9, "System"
+{
+ RADIOBUTTON "OpenG&L", DLGRBN1 +0, 39, 7, 40, 12
+ RADIOBUTTON "G&DI",    DLGRBN1 +1, 89, 7, 40, 12
+ DEFPUSHBUTTON "&Ok",      IDOK,  4, 25, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 25, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104, 25, 40, 14
+}
+
+STYLEOPT DIALOG 18, 18, 148, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Line Style & Width"
+{
+ CTEXT "-", DLGSTAT +0, 2, 3, 144, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "&Solid",        DLGRBN1 +0, 14, 14, 39, 10
+ RADIOBUTTON "&Dashed",       DLGRBN1 +1, 14, 24, 45, 10
+ RADIOBUTTON "do&Tted",       DLGRBN1 +2, 14, 34, 43, 10, BS_RADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ RADIOBUTTON "d&Ash-dot",     DLGRBN1 +3, 14, 44, 48, 10
+ RADIOBUTTON "das&H-dot-dot", DLGRBN1 +4, 14, 54, 53, 10
+ CTEXT "&Width",              DLGTEXT +0, 82, 24, 62, 10
+ EDITTEXT                     DLGEDIT +0, 93, 38, 40, 14, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,   4, 71, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  54, 71, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 104, 71, 40, 14
+}
+
+
+EDITMODE DIALOG 164, 94, 148, 66
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+
+CAPTION "Set Edit Compatibility Mode"
+FONT 9, "System"
+{
+ RADIOBUTTON "HULLFORM &8+", DLGRBN1 +0, 44, 11, 60, 12
+ RADIOBUTTON "HULLFORM &7-", DLGRBN1 +1, 44, 28, 60, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 48, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 48, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 48, 40, 14
+}
+
+REMOVELI DIALOG 90, 84, 246, 159
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Remove a hull line"
+{
+ LTEXT "Hull lines range from 1 to xx.", DLGSTAT +0, 4, 4, 54, 17
+ LTEXT "Which one is to be removed?", -1, 4, 23, 53, 26
+ EDITTEXT DLGEDIT +0, 20, 44, 20, 12, WS_BORDER | WS_TABSTOP
+ CONTROL "", 300, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 61, 14, 180, 142
+ DEFPUSHBUTTON "&Ok", IDOK, 10, 76, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 10, 95, 40, 14
+ PUSHBUTTON "&Help", IDHELP, 10, 114, 40, 14
+ CTEXT "Click the line you want removed", -1, 90, 4, 121, 8
+}
+
+#ifdef PROF
+
+STABTABU DIALOG 16, 45, 186, 154
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Tabular Output Options"
+{
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 4, 3, 177, 48
+ LTEXT "PARAMETER TO VARY:", -1, 7, 4, 84, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "&Displacement", DLGRBN1 +0, 6, 13, 56, 12
+ RADIOBUTTON "d&Rraft",       DLGRBN1 +1, 6, 30, 31, 12
+ LTEXT "(hull will be balanced)", -1, 15, 23, 76, 8
+ LTEXT "(hull fixed)", -1, 15, 41, 35, 8
+
+ RTEXT "s&Tart value", DLGTEXT +0, 95, 10, 38, 8
+ EDITTEXT DLGEDIT +0, 136, 7, 40, 12, WS_BORDER | WS_TABSTOP
+ RTEXT "&End value", DLGTEXT +1, 95, 23, 38, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +1, 136, 21, 40, 12, WS_BORDER | WS_TABSTOP
+ RTEXT "&Increment", DLGTEXT +2, 95, 37, 38, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +2, 136, 35, 40, 12, WS_BORDER | WS_TABSTOP
+
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 4, 54, 177, 37
+ LTEXT "TABLE FORM:", -1, 7, 56, 64, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ RADIOBUTTON "&Stability table",   DLGRBN2 +0, 6, 65, 60, 10
+ RADIOBUTTON "&Hydrostatic table", DLGRBN2 +1, 6, 75, 64, 12
+
+ PUSHBUTTON "st&Ability variable", DLGPBF +0, 78, 57, 100, 12
+ PUSHBUTTON "hydrostatic table &Variables", DLGPBF + 1, 78, 76, 100, 12
+
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 4, 94, 177, 35
+ LTEXT "VALUE SEPARATOR:", -1, 7S, 107, 80, 8
+ CONTROL "s&Paces", DLGRBN3 +0, "BUTTON", BS_AUTORADIOBUTTON, 78,  97, 44, 10
+ CONTROL "ta&Bs",   DLGRBN3 +1, "BUTTON", BS_AUTORADIOBUTTON, 78, 107, 44, 10
+ CONTROL "co&Mmas", DLGRBN3 +2, "BUTTON", BS_AUTORADIOBUTTON, 78, 117, 44, 10
+
+ DEFPUSHBUTTON "&Ok",      IDOK,  23, 134, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  73, 134, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 123, 134, 40, 14
+}
+
+#endif
+
+IMPORT DIALOG 17, 23, 252, 219
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Select Import File Format"
+FONT 9, "System"
+{
+ RADIOBUTTON "Sections &Down page:",               DLGRBN1 +0, 5,  4, 96, 12, BS_RADIOBUTTON | WS_TABSTOP
+ RADIOBUTTON "b&Uttocks, sections across page:",   DLGRBN1 +1, 5, 34, 116, 12, BS_RADIOBUTTON | WS_TABSTOP
+ RADIOBUTTON "&Waterlines, sections across page:", DLGRBN1 +2, 5, 74, 119, 12, BS_RADIOBUTTON | WS_TABSTOP
+ RADIOBUTTON "bu&Ttocks, sections down page:",     DLGRBN1 +3, 5,118, 109, 12, BS_RADIOBUTTON | WS_TABSTOP
+ RADIOBUTTON "w&Aterlines, sections down page:",   DLGRBN1 +4, 5,158, 112, 12, BS_RADIOBUTTON | WS_TABSTOP
+ LTEXT "X  Y Z  Y Z  Y Z  Y Z  ...", -1, 12,  14, 86, 8
+ LTEXT "X  Y Z  Y Z  Y Z  Y Z  ...", -1, 12,  24, 86, 8
+ LTEXT "    X  X  X  X  X  ...",     -1, 12,  44, 60, 8
+ LTEXT "Y  Z  Z  Z  Z  Z  ...",      -1, 12,  54, 60, 8
+ LTEXT "Y  Z  Z  Z  Z  Z  ...",      -1, 12,  64, 60, 8
+ LTEXT "     X  X  X  X  X  ...",    -1, 12,  84, 60, 8
+ LTEXT "Z  Y  Y  Y  Y  Y  ...",      -1, 12,  94, 60, 8
+ LTEXT "Z  Y  Y  Y  Y  Y  ...",      -1, 12, 105, 60, 8
+ LTEXT "    Y  Y  Y  Y  Y  ...",     -1, 12, 128, 60, 8
+ LTEXT "X  Z  Z  Z  Z  Z  ...",      -1, 12, 138, 60, 8
+ LTEXT "X  Z  Z  Z  Z  Z  ...",      -1, 12, 148, 60, 8
+ LTEXT "    Z  Z  Z  Z  Z  ...",     -1, 12, 168, 60, 8
+ LTEXT "X  Y  Y  Y  Y  Y  ...",      -1, 12, 178, 60, 8
+ LTEXT "X  Y  Y  Y  Y  Y  ...",      -1, 12, 188, 60, 8
+ CHECKBOX "&First row/column is sheerline",    DLGLOG +0,  140, 28, 105, 12
+ CHECKBOX "f&Irst section is stem",            DLGLOG +1,  140, 41, 102, 12
+ RADIOBUTTON "&Chines",                        DLGRBN2 +0, 140, 62, 60, 12
+ RADIOBUTTON "&Rounded",                       DLGRBN2 +1, 140, 74, 60, 12
+ LTEXT "Number of &Sections (including stem)", DLGTEXT +0, 140, 93, 69, 18
+ EDITTEXT                                      DLGEDIT +0, 225, 95, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "Number of &Lines",                     DLGTEXT +1, 140, 116, 60, 8
+ EDITTEXT                                      DLGEDIT +1, 225, 114, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "File &Name:",                          DLGTEXT +2, 140, 142, 42, 8
+ EDITTEXT                                      DLGEDIT +2, 140, 157, 108, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse",                         DLGPBF +0,  206, 140, 40, 12
+ DEFPUSHBUTTON "&Ok",      IDOK,  56, 200, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 106, 200, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 156, 200, 40, 14
+}
+
+NACA DIALOG 90, 65, 268, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+
+CAPTION "NACA Foil Design"
+{
+ LTEXT "&First line of range", DLGTEXT +0, 4, 4, 71, 10
+ EDITTEXT DLGEDIT +0, 73, 2, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Starting X", DLGTEXT +1, 100, 4, 36, 8
+ EDITTEXT DLGEDIT +1, 136, 2, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Ending X", DLGTEXT +2, 180, 4, 32, 8
+ EDITTEXT DLGEDIT +2, 214, 2, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Last line of range", DLGTEXT +3, 4, 18, 66, 10
+ EDITTEXT DLGEDIT +3, 73, 16, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "s&Tarting X", DLGTEXT +4, 100, 18, 34, 8
+ EDITTEXT DLGEDIT +4, 136, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "e&Nding X", DLGTEXT +5, 180, 18, 31, 8
+ EDITTEXT DLGEDIT +5, 214, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "s&Pan", DLGTEXT +6, 4, 46, 18, 8
+ EDITTEXT DLGEDIT +6, 52, 44, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Profile no:  00", DLGTEXT +7, 100, 45, 47, 8
+ EDITTEXT DLGEDIT +7, 146, 44, 30, 12, WS_BORDER | WS_TABSTOP
+ AUTOCHECKBOX "&Add sections at leading and trailing edges", DLGLOG +0, 4, 29, 145, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      64, 63, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 114, 63, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   164, 63, 40, 14
+}
+
+#ifdef PROF
+HAVETANK DIALOG 136, 31, 132, 76
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "WARNING!"
+FONT 12, "MS Sans Serif"
+{
+ LTEXT "Your design includes internal tanks. These will be lost in the process of adding the NACA profile.\n\nPress Ok to continue, Cancel to abort the process.", -1, 6, 3, 121, 51
+ DEFPUSHBUTTON "&Ok",      IDOK, 21, 58, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 71, 58, 40, 14
+}
+#endif
+
+#ifdef EXT_OR_PROF
+
+CONFPORT DIALOG 96, 53, 222, 77
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Non-Windows Plotter Output"
+{
+ RADIOBUTTON "&NONE", DLGRBN1 +0, 4, 4, 35, 10
+ RADIOBUTTON "H&PGL", DLGRBN1 +1, 4, 16, 30, 10
+ RADIOBUTTON "&Tektronix", DLGRBN1 +2, 4, 28, 42, 10
+ RADIOBUTTON "&ReGIS", DLGRBN1 +3, 4, 40, 33, 10
+ RADIOBUTTON "&DXF file", DLGRBN1 +4, 4, 52, 34, 10
+ RADIOBUTTON "&Windows metafile", DLGRBN1 +5, 4, 64, 69, 10
+ LTEXT "&File to be used:", DLGTEXT +0, 78, 12, 64, 9
+ EDITTEXT DLGEDIT +0, 78, 26, 140, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse", DLGPBF +0, 178, 9, 40, 14
+ DEFPUSHBUTTON "&Ok",  IDOK,      78, 51, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 128, 51, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   178, 51, 40, 14
+}
+
+CONFFILE DIALOG 6, 75, 238, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "File Directories"
+{
+ LTEXT "&Hull data files", DLGTEXT +0, 2, 6, 54, 9
+ EDITTEXT DLGEDIT +0, 66, 4, 120, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse", DLGPBF +0, 191, 3, 40, 14
+
+ LTEXT "&General file output", DLGTEXT +1, 2, 27, 62, 8
+ EDITTEXT DLGEDIT +1, 66, 25, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "b&Rowse", DLGPBF+1, 191, 24, 40, 14
+
+ LTEXT "&DXF output files", DLGTEXT +2, 2, 48, 54, 9
+ EDITTEXT DLGEDIT +2, 66, 46, 120, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "bro&Wse", DLGPBF +2, 191, 45, 40, 14
+
+ DEFPUSHBUTTON "&Ok",  IDOK,      49, 64, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  99, 64, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   149, 64, 40, 14
+}
+
+#else
+
+CONFFILE DIALOG 6, 75, 238, 61
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "FILE DIRECTORIES"
+{
+ LTEXT "&Hull data files", DLGTEXT +0, 2, 6, 54, 9
+ EDITTEXT DLGEDIT +0, 66, 4, 120, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse", DLGPBF +0, 191, 3, 40, 14
+ LTEXT "&General file output", DLGTEXT +1, 2, 27, 62, 8
+ EDITTEXT DLGEDIT +1, 66, 25, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "b&Rowse", DLGPBF+1, 191, 24, 40, 14
+ DEFPUSHBUTTON "&Ok", IDOK, 67, 42, 30, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 102, 42, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 137, 42, 30, 14
+}
+
+#endif
+
+
+CONFDENS DIALOG 99, 76, 148, 42
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Density of water"
+{
+ LTEXT "Enter water's specific gravity", -1, 6, 8, 108, 12, WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +0, 114, 6, 30, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 24, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 24, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 24, 40, 14
+}
+
+
+
+CONFDETA DIALOG 109, 90, 148, 64
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Extra Drawing Points"
+{
+#ifdef EXT_OR_PROF
+ LTEXT "Number of points to plot between &Sections", DLGTEXT +0,  4, 4,118, 18
+ EDITTEXT                                            DLGEDIT +0,124, 5, 20, 12, WS_BORDER | WS_TABSTOP
+#endif
+ LTEXT "Number of points to plot between &Lines",    DLGTEXT +1,  4,26,118, 18
+ EDITTEXT                                            DLGEDIT +1,124,27, 20, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 46, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 46, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 46, 40, 14
+}
+
+#ifdef PROF
+EDITTRAN DIALOG 103, 56, 148, 91
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Transom Definition"
+BEGIN
+	LTEXT "&Distance above stern keel",   111,  4, 4, 100, 12
+	EDITTEXT DLGEDIT+0,                       107, 4, 36,  12
+	LTEXT "&Angle forward from vertical", 112,  4, 24, 100,12
+	EDITTEXT DLGEDIT+1,                       107, 24, 36, 12
+	LTEXT "&Radius", 113,                       4, 44, 25, 12
+	EDITTEXT DLGEDIT+2,                       107, 44, 36, 12
+	CHECKBOX "&Transom active", DLGLOG+0, 44, 57, 61, 12
+	DEFPUSHBUTTON "&Ok",  IDOK,      4, 73, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 54, 73, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 73, 40, 14
+END
+#endif
+
+STATSETT DIALOG 48, 61, 206, 84
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Statics Settings"
+BEGIN
+	LTEXT "h&Eel",                  111,  3,  6, 17, 8
+	EDITTEXT DLGEDIT+0,                  33,  4, 40, 12
+	LTEXT "&Pitch",                 112,  3, 28, 18, 8
+	EDITTEXT DLGEDIT+1,                  33, 26, 40, 12
+	LTEXT "&Sinkage",               113,  3, 50, 26, 8
+	EDITTEXT DLGEDIT+2,                  33, 48, 40, 12
+	LTEXT "&Displacement",          114, 80, 6, 46, 9
+	EDITTEXT DLGEDIT+3,                 130, 4, 71, 12
+	LTEXT "&X-centre of mass (LCG)",115, 80,28, 84, 16
+	EDITTEXT DLGEDIT+4,                 161,26, 40, 12
+	LTEXT "&Z-centre of mass (VCG)",116, 80,50, 84, 18
+	EDITTEXT DLGEDIT+5,                 161,48, 40, 12
+	DEFPUSHBUTTON "&Ok", IDOK,       33, 66,40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL,  83, 66,40, 14
+	PUSHBUTTON "&Help", IDHELP,     133, 66,40, 14
+END
+
+#ifdef PROF
+
+PLOTVARI DIALOG 28, 25, 202, 156
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Define plotting parameters"
+{
+ LTEXT "Value range", -1, 80, 5, 40, 8
+ LTEXT "&Start", DLGTEXT +0, 11, 18, 16, 8
+ EDITTEXT DLGEDIT +0, 30, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&End", DLGTEXT +1, 74, 18, 14, 8
+ EDITTEXT DLGEDIT +1, 90, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Incr.", DLGTEXT +2, 134, 18, 16, 8
+ EDITTEXT DLGEDIT +2, 150, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ CTEXT "&Determining variable", -1,13, 34, 50, 17, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX DLGLBX +0,13, 53, 49, 80, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+ CTEXT "&X-axis variable", -1, 80, 35, 50, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX DLGLBX +1, 77, 53, 49, 80, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+ CTEXT "&Y-axis variable", -1, 137, 35, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX DLGLBX +2, 139, 53, 49, 80, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,  31, 138, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  81, 138, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 131, 138, 40, 14
+}
+
+#endif
+
+WATERLIN DIALOG 116, 73, 148, 112
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Waterline output options"
+{
+ LTEXT "&Initial value", DLGTEXT +0,  4,  6, 50,  8
+ EDITTEXT                DLGEDIT +0, 90,  5, 54, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "i&Nterval",      DLGTEXT +1,  4, 21, 50,  8
+ EDITTEXT                DLGEDIT +1, 90, 20, 54, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Sections to write",DLGTEXT+2,4, 34, 70,  8
+ EDITTEXT                DLGEDIT +2, 90, 35, 54, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ LTEXT "File &Name:",    DLGTEXT +3,  4, 62, 42,  8
+ EDITTEXT                DLGEDIT +3,  4, 73,140, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse",   DLGPBF  +0, 90, 56, 54, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 92, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 92, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 92, 40, 14
+}
+
+REMOSTLI DIALOG 25, 53, 168, 56
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Deletion of the stem line"
+{
+ LTEXT "You have asked to delete the line to which the\nstem ties. Please enter a new stem line\nnumber (using the PRE-DELETION set)", -1, 4, 4, 130, 8
+ EDITTEXT DLGEDIT +0, 146, 20, 20, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "+", DLGINC, 137, 18, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 137, 28, 7, 7
+ DEFPUSHBUTTON "&Ok",      IDOK,  14, 38, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  64, 38, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 114, 38, 40, 14
+}
+
+SMOOEXI1 DIALOG 88, 83, 148, 81
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Change"
+{
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 2, 21, 55, 39
+ CTEXT "Movement direction", -1,  1, 3, 56, 15, WS_CHILD | WS_VISIBLE
+ RADIOBUTTON "&Vertical",      DLGRBN1 +0, 5, 22, 49, 10
+ RADIOBUTTON "&Lateral",       DLGRBN1 +1, 5, 34, 49, 10
+ RADIOBUTTON "&Radially",      DLGRBN1 +2, 5, 46, 48, 10
+
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 62, 21, 72, 26
+ CTEXT "Line to be moved",   -1, 72, 3, 54, 17, WS_CHILD | WS_VISIBLE
+ RADIOBUTTON "&This line",     DLGRBN2 +0, 65, 22, 39, 11
+ RADIOBUTTON "&Previous line", DLGRBN2 +1, 65, 34, 53, 11
+
+ LTEXT "(00)",                 DLGSTAT +0, 119, 24, 13, 8
+ LTEXT "(00)",                 DLGSTAT +1, 119, 36, 13, 8
+
+ DEFPUSHBUTTON "&Ok",      IDOK,  4, 63, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 63, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104, 63, 40, 14
+}
+
+
+SMOOEXIL DIALOG 114, 84, 101, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Select Change Direction"
+BEGIN
+	RADIOBUTTON "&Vertically", DLGRBN1+0, 4, 8, 40, 12
+	RADIOBUTTON "ho&Rizontally", DLGRBN1+1, 4, 25, 50, 12
+	DEFPUSHBUTTON "&Ok", IDOK, 67, 2, 30, 12
+	PUSHBUTTON "&Cancel", IDCANCEL, 67, 16, 30, 12
+	PUSHBUTTON "&Help", IDHELP, 67, 31, 30, 12
+END
+
+
+INPFRAC DIALOG 95, 93, 111, 41
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_THICKFRAME
+CAPTION "Line Smoothing"
+BEGIN
+	LTEXT "Fraction of relaxed offsets to include", -1, 3, 5, 63, 15, WS_CHILD | WS_VISIBLE | WS_GROUP
+	EDITTEXT DLGEDIT +0, 70, 7, 40, 12, ES_LEFT | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+	DEFPUSHBUTTON "&Ok", IDOK, 6, 26, 30, 12
+	PUSHBUTTON "&Cancel", IDCANCEL, 42, 26, 30, 12
+	PUSHBUTTON "&Help", IDHELP, 78, 26, 30, 12
+END
+
+CURVFACT DIALOG 104, 79, 106, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Enter line-end curvature factors"
+{
+ LTEXT "&Bow factor", -1, 7, 4, 36, 8
+ EDITTEXT DLGEDIT +0, 55, 2, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Stern factor", -1, 7, 18, 39, 8
+ EDITTEXT DLGEDIT +1, 55, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 3, 31, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 38, 31, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 72, 31, 30, 12
+}
+
+#ifdef PROF
+
+DRAGSPEE DIALOG 104, 69, 148, 52
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Speed for Drag Calculation"
+BEGIN
+	CTEXT "&Speed", -1, 10,  4, 30, 8
+	EDITTEXT DLGEDIT+0, 10, 14, 30, 12
+	RADIOBUTTON "&Measurement units", DLGRBN1+0, 57, 18, 90, 12
+	RADIOBUTTON "&Knots", DLGRBN1+1, 57, 5, 28, 12
+	DEFPUSHBUTTON "&Ok",  IDOK,      4, 34, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 54, 34, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 34, 40, 14
+END
+
+DRAGHOLT DIALOG 90, 75, 137, 49
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Propellor Details"
+{
+ LTEXT "&Diameter", DLGTEXT +0, 4, 6, 32, 8
+ EDITTEXT DLGEDIT +0, 56, 4, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Pitch/diameter ratio", DLGTEXT +1, 4, 19, 46, 15
+ EDITTEXT DLGEDIT +1, 56, 21, 30, 12, WS_BORDER | WS_TABSTOP
+ CHECKBOX "&Twin screw", DLGLOG +0, 4, 35, 46, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 103, 3, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 103, 19, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 103, 35, 30, 12
+}
+
+DRAGOORT DIALOG 90, 75, 137, 47
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Propellor Details"
+BEGIN
+	LTEXT "&Diameter", -1, 4, 6, 32, 8
+	EDITTEXT DLGEDIT+0, 56, 4, 30, 12
+	LTEXT "&Pitch/diameter ratio", -1, 4, 19, 46, 15
+	EDITTEXT DLGEDIT+1, 56, 21, 30, 12
+	DEFPUSHBUTTON "&Ok", IDOK, 102, 4, 30, 12
+	PUSHBUTTON "&Cancel", IDCANCEL, 102, 18, 30, 12
+	PUSHBUTTON "&Help", IDHELP, 102, 32, 30, 12
+END
+
+DRAGPLOT DIALOG 17, 31, 194, 163
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Drag Plotting Options"
+{
+ CHECKBOX "&Gerritsma 1981", DLGLOG +0, 7, 3, 59, 10
+ CHECKBOX "&Gerritsma 1996", DLGLOG +1, 7, 13, 64, 10
+ CHECKBOX "Ho&Ltrop && Mennen", DLGLOG +2, 7, 23, 72, 10
+ CHECKBOX "Oo&Rtmerssen", DLGLOG +3, 7, 33, 55, 10
+ CHECKBOX "&Savitsky", DLGLOG +4, 7, 43, 39, 10
+ CHECKBOX "Savitsky && &Brown", DLGLOG +5, 7, 53, 100, 10
+
+ CTEXT "s&Peeds to ...", DLGTEXT +0,           120, 12, 50, 8
+ EDITTEXT DLGEDIT +0,                          120, 22, 50, 12
+ RADIOBUTTON "&Knots", DLGRBN1 +1,             108, 36, 33, 10
+ RADIOBUTTON "&Measurement units", DLGRBN1 +0, 108, 46, 88, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 100, 9, 90, 50
+
+ LTEXT "Single Plot for ...", -1, 7, 72, 63, 8
+ RADIOBUTTON "&Existing state", DLGRBN2 +0, 118, 70, 55, 12
+ LTEXT "Multiple plots for range of ...", -1, 7, 98, 94, 8
+ RADIOBUTTON "&Displacement", DLGRBN2 +1, 102, 97, 55, 10
+ RADIOBUTTON "&X-centre of mass (LCG)", DLGRBN2 +2, 102, 107, 83, 10
+ LTEXT "s&Tart value", DLGTEXT +1, 7, 117, 19, 18
+ EDITTEXT DLGEDIT +1, 28, 120, 32, 12
+ LTEXT "e&Nd value", DLGTEXT +2, 64, 117, 20, 18
+ EDITTEXT DLGEDIT +2, 85, 120, 32, 12
+ LTEXT "&Incre- ment", DLGTEXT +3, 123, 117, 19, 18
+ EDITTEXT DLGEDIT +3, 144, 120, 32, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 95, 187, 44
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 69, 187, 16
+ DEFPUSHBUTTON "&Ok",  IDOK,     27, 145, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 77, 145, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  127, 145, 40, 14
+ CTEXT "OR", -1, 99, 86, 12, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+}
+
+DRAGSAVI DIALOG 105, 73, 110, 50
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Savitsky Propellor Definition"
+BEGIN
+	LTEXT "&Shaft inclination", DLGTEXT+0, 4, 6, 54, 9
+	EDITTEXT DLGEDIT+0, 66, 4, 40, 12
+	LTEXT "&Offset below stern", DLGTEXT+1, 4, 20, 61, 8
+	EDITTEXT DLGEDIT+1, 66, 18, 40, 12
+	DEFPUSHBUTTON "&Ok", IDOK, 4, 34, 30, 12
+	PUSHBUTTON "&Cancel", IDCANCEL, 40, 34, 30, 12
+	PUSHBUTTON "&Help", IDHELP, 76, 34, 30, 12
+END
+
+#endif
+
+#ifdef PROF
+
+PLATEDLG DIALOG 105, 73, 143, 102
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Evaluate Developability"
+{
+ LTEXT "&Number of higher-indexed line", DLGTEXT +0, 4, 7, 100, 17
+ EDITTEXT DLGEDIT +0,117, 6, 20, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "+", DLGINC,106,  3, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC,106, 13, 7, 7
+ LTEXT "number of &Transom lines", DLGTEXT +1, 4, 24, 100, 8
+ EDITTEXT DLGEDIT +1,117, 22, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Ignore sections", DLGTEXT +2, 4, 44, 73, 8
+ EDITTEXT DLGEDIT +2, 60, 42, 77, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Extra points between sections", DLGTEXT +3, 4, 64,100, 8
+ EDITTEXT DLGEDIT +3,117, 62, 20, 12, WS_BORDER | WS_TABSTOP
+
+ DEFPUSHBUTTON "&Ok",  IDOK,      6, 83, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 51, 83, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   97, 83, 40, 14
+}
+
+STEMRADI DIALOG 108, 78, 152, 120
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Stem radius definition"
+BEGIN
+    LTEXT "Current values", -1, 6, 2, 60, 8
+    LISTBOX DLGLBX +0, 6, 13, 80, 80, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT DLGEDIT +0, 94, 56, 50, 14, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+    PUSHBUTTON "<- &Alter sel.", DLGPBF +0, 94, 37, 50, 14
+    DEFPUSHBUTTON "&Ok", IDOK, 6, 97, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+    PUSHBUTTON "&Cancel", IDCANCEL, 56, 97, 40, 14
+    PUSHBUTTON "&Help", IDHELP, 106, 97, 40, 14
+END
+
+#endif
+
+STEMLINE DIALOG 108, 83, 148, 44
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Stem line definition"
+BEGIN
+	LTEXT "Enter index of line which joins the stem", -1,21, 4, 70, 16
+	EDITTEXT DLGEDIT +0, 107, 7, 20, 12
+	PUSHBUTTON "+", DLGINC, 97, 4, 7, 7
+	PUSHBUTTON "-", DLGDEC, 97,14, 7, 7
+	DEFPUSHBUTTON "&Ok",  IDOK,      4, 26, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 54, 26, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 26, 40, 14
+END
+
+
+EDITMULT DIALOG 22, 67, 218, 112
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Multiply or Add to Hull Dimensions"
+BEGIN
+	RADIOBUTTON "multiply &Vertical dimensions",     DLGRBN1 +0, 4,  5, 102, 8
+	RADIOBUTTON "multiply &Transverse dimensions",   DLGRBN1 +1, 4, 17, 115, 8
+	RADIOBUTTON "multiply &Longitudinal dimensions", DLGRBN1 +2, 4, 29, 121, 8
+	RADIOBUTTON "shift lines &Forwards/backwards",   DLGRBN1 +3, 4, 47, 110, 8
+	RADIOBUTTON "shift lines &Up/down",              DLGRBN1 +4, 4, 59,  73, 8
+	LTEXT "&Multiply by", DLGTEXT +1, 127, 6, 37, 8
+	EDITTEXT              DLGEDIT +1, 125, 16, 40, 12
+	LTEXT "&Divide by",   DLGTEXT +2, 177, 6, 32, 8
+	EDITTEXT              DLGEDIT +2, 173, 16, 40, 12
+	CTEXT "/", -1, 167, 18, 4, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	LTEXT "&Add",         DLGTEXT +3, 135, 53, 15, 8
+	EDITTEXT              DLGEDIT +3, 152, 51, 40, 12
+	LTEXT "&Select lines",DLGTEXT +0,  51, 77, 46, 8
+	CONTROL "", DLGEDIT +0, "EDIT", ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP, 94, 75, 71, 12
+	CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 2,  2, 214, 38
+	CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 2, 44, 214, 27
+	DEFPUSHBUTTON "&Ok",  IDOK,     39, 92, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 89, 92, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  139, 92, 40, 14
+END
+
+#ifdef PROF
+EDITRELI DIALOG 68, 74, 162, 67
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Orientate Hull Lines"
+BEGIN
+	RADIOBUTTON "&Buttock lines", DLGRBN1+0, 4, 4, 53, 12
+	RADIOBUTTON "&Diagonals", DLGRBN1+1, 4, 16, 44, 12
+	RADIOBUTTON "&Waterlines", DLGRBN1+2, 4, 28, 45, 12
+	LTEXT "&Interval between lines", DLGTEXT+0, 67, 6, 46, 17
+	EDITTEXT DLGEDIT+0, 117, 8, 40, 12
+	LTEXT "diagonal &Angle", DLGTEXT+1, 66, 31, 48, 8
+	EDITTEXT DLGEDIT+1, 117, 29, 40, 12
+	DEFPUSHBUTTON "&Ok",  IDOK,     11, 47, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 61, 47, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  111, 47, 40, 14
+END
+
+EDITTANKS DIALOG 20,20,160,140
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Edit Tanks"
+FONT 9, "System"
+{
+ CTEXT "Defined Tanks",       -1,42,  4,112, 10
+ LISTBOX               DLGLBX +0,42, 16,112,100, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ PUSHBUTTON "&Add",    DLGPBF +0, 6, 36, 30, 14
+ PUSHBUTTON "&Delete"  DLGPBF +1, 6, 58, 30, 14
+ PUSHBUTTON "&Edit",   DLGPBF +2, 6, 80, 30, 14
+
+ DEFPUSHBUTTON "&Quit",  IDOK,  35,120, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  85,120, 40, 14
+}
+
+EDITTANK DIALOG 9, 20, 200, 174
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Tank Definition"
+FONT 9, "System"
+{
+ LTEXT "&Start section", DLGTEXT +0, 3, 5, 42, 8
+ EDITTEXT DLGEDIT +0, 46, 4, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&End section", DLGTEXT +1, 73, 5, 39, 8
+ EDITTEXT DLGEDIT +1, 112, 4, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Description", DLGTEXT +2, 3, 22, 40, 8
+ EDITTEXT DLGEDIT +2, 46, 20, 151, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 36, 194, 16
+
+ RADIOBUTTON "&Arbitrary shape", DLGRBN1 +0, 8, 39, 60, 12
+ RADIOBUTTON "&Rectangular shape", DLGRBN1 +1, 8, 64, 73, 12
+ RADIOBUTTON "&Mirror another tank", DLGRBN1+2, 8, 90, 75, 12
+ RADIOBUTTON "&Fit inside hull", DLGRBN1+3, 8, 109, 56, 12
+
+ LTEXT "&Number of lines", DLGTEXT +3, 104, 40, 52, 8
+ EDITTEXT DLGEDIT +3, 162, 38, 30, 12, WS_BORDER | WS_TABSTOP
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 55, 194, 30
+ LTEXT "&Width", DLGTEXT +4, 81, 59, 21, 8
+ EDITTEXT DLGEDIT +4, 103, 57, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "de&Pth", DLGTEXT +5, 81, 73, 22, 8
+ EDITTEXT DLGEDIT +5, 103, 71, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Inside", DLGTEXT +6, 136, 59, 20, 8
+ EDITTEXT DLGEDIT +6, 162, 57, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Base", DLGTEXT +7, 136, 73, 18, 8
+ EDITTEXT DLGEDIT +7, 162, 71, 30, 12, WS_BORDER | WS_TABSTOP
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 88, 194, 16
+ EDITTEXT DLGEDIT+8, 162, 90, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "inde&X number", DLGTEXT+8, 110, 92, 50, 8
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 107, 194, 44
+ RADIOBUTTON "p&Ort", DLGRBN2+0,       20,119,50,10
+ RADIOBUTTON "s&Tarboard", DLGRBN2+1,  20,129,50,10
+ RADIOBUTTON "bot&H sides", DLGRBN2+2, 20,139,50,10
+ LTEXT "Top",    DLGTEXT+ 9, 81,111, 24,8
+ EDITTEXT        DLGEDIT+ 9,103,109, 30,12, WS_BORDER | WS_TABSTOP
+ LTEXT "Inside", DLGTEXT+10,136,111, 24,8
+ EDITTEXT        DLGEDIT+10,162,109, 30,12, WS_BORDER | WS_TABSTOP
+ LTEXT "Base",   DLGTEXT+11, 81,125, 24,8
+ EDITTEXT        DLGEDIT+11,103,123, 30,12, WS_BORDER | WS_TABSTOP
+ LTEXT "Outside",DLGTEXT+12,136,125, 25,8
+ EDITTEXT        DLGEDIT+12,162,123, 30,12, WS_BORDER | WS_TABSTOP
+ LTEXT "s&Kin thickness",DLGTEXT+13,108,139,50,8
+ EDITTEXT DLGEDIT+13, 162,137, 30, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,     30, 155, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 80, 155, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  130, 155, 40, 14
+}
+
+EDITDELT DIALOG 109, 75, 108, 56
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Delete an Internal Tank"
+{
+ LTEXT "Enter index number of tank to be deleted", -1, 5, 15, 66, 16
+ CTEXT "Tank indices run from xx to xx", DLGSTAT +0, 3, 4, 101, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +0, 83, 18, 20, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 4, 37, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 39, 37, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 74, 37, 30, 12
+ PUSHBUTTON "+", DLGINC, 73, 15, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 73, 25, 7, 7
+}
+
+EDITSTAT DIALOG 27, 26, 174, 140
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Tank Properties"
+FONT 9, "System"
+{
+ LTEXT       "tank &Name",        DLGTEXT +0,  5,  6, 40, 12
+ EDITTEXT                         DLGEDIT +0, 50,  4,120, 12, WS_BORDER | WS_TABSTOP
+ LTEXT       "Tank Position",             -1,  7, 23, 45, 8
+ RADIOBUTTON "&Port",             DLGRBN1 +0,  7, 33, 28, 8
+ RADIOBUTTON "&Starboard",        DLGRBN1 +1,  7, 43, 42, 8
+ LTEXT       "Filling Status",            -1, 81, 23, 43, 8
+ RADIOBUTTON "&Leaky",            DLGRBN2 +0, 82, 32, 35, 8
+ RADIOBUTTON "&Fixed volume ...", DLGRBN2 +1, 82, 45, 62, 8
+ RADIOBUTTON "&% volume ...",     DLGRBN2 +2, 82, 56, 54, 8
+ LTEXT       "...&Contents",      DLGTEXT +1, 82, 68, 50, 8
+ EDITTEXT                         DLGEDIT +1,140, 66, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT       "specific &Gravity", DLGTEXT +2, 82, 84, 60, 12, WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT                         DLGEDIT +2,140, 82, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT       "p&Ermeability",     DLGTEXT +3, 82,100, 50, 16
+ EDITTEXT                         DLGEDIT +3,140, 98, 30, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",                   IDOK, 17,118, 40, 14
+ PUSHBUTTON    "&Cancel",           IDCANCEL, 67,118, 40, 14
+ PUSHBUTTON    "&Help",               IDHELP,117,118, 40, 14
+}
+#endif
+
+CONFSCAL DIALOG 102, 75, 148, 91
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Graphical Scaling Factors"
+{
+ LTEXT "&Scale (true/page)", DLGTEXT +0, 10,  4, 58, 8
+ EDITTEXT DLGEDIT +0,                    68,  3, 40, 12, WS_BORDER | WS_TABSTOP
+
+ LTEXT "&Width of page", -1,             10, 22, 47, 8
+ EDITTEXT DLGEDIT +1,                    68, 21, 40, 12, WS_BORDER | WS_TABSTOP
+ RADIOBUTTON "&Mm", DLGRBN1 +0,         111, 17, 28, 10
+ RADIOBUTTON "&Inch", DLGRBN1 +1,       111, 27, 28, 10
+
+ LTEXT "&X-stretch factor", DLGTEXT +2,  10, 40, 61, 8
+ EDITTEXT DLGEDIT +2,                    68, 39, 40, 12, WS_BORDER | WS_TABSTOP
+
+ LTEXT "&Y-stretch factor", DLGTEXT +3,  10, 58, 61, 8
+ EDITTEXT DLGEDIT +3,                    68, 57, 40, 12, WS_BORDER | WS_TABSTOP
+
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 73, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 73, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 73, 40, 14
+}
+
+
+SMOOEXI2 DIALOG 88, 83, 148, 77
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Change"
+BEGIN
+	CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 2, 21, 55, 39
+	CTEXT "Movement direction", -1, 1, 3, 56, 15, WS_CHILD | WS_VISIBLE
+	RADIOBUTTON "&Vertically",   DLGRBN1 +0, 5, 22, 49, 10
+	RADIOBUTTON "ho&Rizontally", DLGRBN1 +1, 5, 34, 49, 10
+	RADIOBUTTON "c&Ircularly",   DLGRBN1 +2, 5, 46, 48, 10
+
+	CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 62, 21, 72, 26
+	CTEXT "Line to be moved", -1, 72, 3, 54, 17, WS_CHILD | WS_VISIBLE
+	RADIOBUTTON "&This line",     DLGRBN2 +0, 65, 22, 39, 11
+	RADIOBUTTON "&Previous line", DLGRBN2 +1, 65, 34, 53, 11
+
+	LTEXT "(00)", DLGSTAT +0, 119, 24, 13, 8
+	LTEXT "(00)", DLGSTAT +1, 119, 36, 13, 8
+
+    DEFPUSHBUTTON "&Ok",      IDOK,  4, 63, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 54, 63, 40, 14
+    PUSHBUTTON "&Help",     IDHELP,104, 63, 40, 14
+END
+
+#ifdef PROF
+TOOLADD DIALOG 94, 47, 156, 105
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Add Item to Run Menu"
+{
+ CTEXT "&Menu entry (maximum 12 characters)", DLGTEXT +0, 4, 4, 148, 8
+ EDITTEXT DLGEDIT +0, 41, 15, 87, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Program to run", DLGTEXT +1, 6, 35, 48, 8
+ PUSHBUTTON "... &Browse", DLGPBF + 0, 112, 32, 40, 14
+ EDITTEXT DLGEDIT +1, 4, 48, 148, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ CHECKBOX "&Add hull file name as command argument", DLGLOG +0, 4, 64, 148, 10
+ CHECKBOX "&Re-open hull file on return", DLGLOG +1, 4, 74, 126, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      8, 87, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 58, 87, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  108, 87, 40, 14
+}
+PROGDEL DIALOG 102, 41, 148, 104
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Delete from the Run Menu"
+{
+ LISTBOX DLGLBX +0, 31, 15, 86, 66, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ CTEXT "Select an item to delete:", -1, 31, 4, 86, 8
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 86, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 86, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 86, 40, 14
+}
+#endif
+
+#ifdef PLATEDEV
+
+DEVEUNDO DIALOG 5, 166, 148, 66
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select line to retain"
+BEGIN
+	RADIOBUTTON "&1st",     DLGRBN1+0,56,  6, 28, 10
+	RADIOBUTTON "&2nd",     DLGRBN1+1,56, 20, 28, 10
+	RADIOBUTTON "&Neither", DLGRBN1+2,56, 34, 36, 10
+	DEFPUSHBUTTON "&Ok",  IDOK,      4, 48, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 54, 48, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 48, 40, 14
+END
+#endif
+
+HELP DIALOG 68, 56, 188, 115
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Help on Hullform Help"
+{
+ CTEXT "There are three ways to access the Hullform for Windows help system:", -1, 2, 4, 184, 18
+ LTEXT "When you have highlighted a menu item, press key F1.", -1, 14, 24, 174, 18
+ LTEXT "When a dialog box is shown to you, it will usually include a Help button. Click this or press keys Alt-H to receive help on the purpose and operation of the dialog box.", -1, 14, 44, 172, 33
+ LTEXT "Use the Index in the help menu, and browse through the topics of concern.", -1, 14, 79, 173, 18
+ LTEXT "1.", -1, 2, 24, 5, 8
+ LTEXT "2.", -1, 2, 44, 5, 8
+ LTEXT "3.", -1, 2, 79, 5, 8
+ DEFPUSHBUTTON "&Ok", IDOK, 74, 100, 40, 14
+}
+
+INPVALUE DIALOG 73, 83, 158, 42
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_THICKFRAME
+CAPTION "Entry of line offsets"
+FONT 9,"System"
+{
+ LTEXT "Enter section numbers and value", -1, 3, 5, 67, 15
+ EDITTEXT DLGEDIT +0, 70, 7, 83, 12, ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,   9, 24, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  59, 24, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 159, 24, 40, 14
+}
+
+
+CONFXPOS DIALOG 89, 68, 148, 44
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "X-Positive Direction"
+{
+ RADIOBUTTON "stem to &Left",  DLGRBN1 +0, 14, 6, 54, 12
+ RADIOBUTTON "stem to &Right", DLGRBN1 +1, 80, 6, 54, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 26, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 26, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 26, 40, 14
+}
+
+
+CONFZPOS DIALOG 89, 68, 148, 44
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Z-Positive Direction"
+{
+ RADIOBUTTON "&Upwards positive",   DLGRBN1 +0,  4, 6, 67, 12
+ RADIOBUTTON "&Downwards positive", DLGRBN1 +1, 78, 6, 74, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 26, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 26, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 26, 40, 14
+}
+
+STATSELE DIALOG 90, 128, 98, 78
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Display Options"
+{
+ PUSHBUTTON "&General",       DLGPBF +0, 24,  4, 50, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Form coeff'ts", DLGPBF +1, 24, 22, 50, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Centres",       DLGPBF +2, 24, 40, 50, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Done", IDCANCEL,  4, 58, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Help",    IDHELP,   54, 58, 40, 14
+}
+
+#ifdef PROF
+
+STATFREE DIALOG 111, 80, 148, 63
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Definition of freeboard point"
+BEGIN
+	RADIOBUTTON "&Minimum", DLGRBN1+0, 24,  4, 39, 10
+	RADIOBUTTON "&At ...",  DLGRBN1+1, 24, 16, 36, 10
+	LTEXT "&Section",       DLGTEXT+0, 33, 28, 24, 8
+	EDITTEXT                DLGEDIT+0, 61, 26, 16, 12
+	LTEXT "&Line",          DLGTEXT+1, 82, 28, 16, 8
+	EDITTEXT                DLGEDIT+1,101, 26, 16, 12
+	DEFPUSHBUTTON "&Ok",      IDOK,   4, 45, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL,  54, 45, 40, 14
+	PUSHBUTTON "&Help",     IDHELP, 104, 45, 40, 14
+END
+
+STABRANG DIALOG 77, 87, 148, 68
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Range of Heel Values for Stability Table"
+BEGIN
+	RTEXT "&Start value", DLGTEXT+0, 28, 6, 38, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+	RTEXT "&End value",   DLGTEXT+1, 28, 21, 38, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+	RTEXT "&Increment",   DLGTEXT+2, 28, 35, 38, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+	EDITTEXT              DLGEDIT+0, 74, 5, 40, 12
+	EDITTEXT              DLGEDIT+1, 74, 19, 40, 12
+	EDITTEXT              DLGEDIT+2, 74, 33, 40, 12
+	DEFPUSHBUTTON "&Ok",      IDOK,   4, 50, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL,  54, 50, 40, 14
+	PUSHBUTTON "&Help",     IDHELP, 104, 50, 40, 14
+END
+
+RELITANK DIALOG 18, 34, 160, 66
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Re-Orienting Lines with Internal Tanks"
+{
+ CTEXT "This operation will automatically delete the floodable tanks you have defined.", -1, 5, 3, 150, 25, WS_CHILD | WS_VISIBLE | WS_GROUP
+ CTEXT "If this is acceptable, select OK, otherwise select Cancel", -1,  5, 25, 150, 17, WS_CHILD | WS_VISIBLE | WS_GROUP
+ DEFPUSHBUTTON "&Ok",      IDOK,  10, 48, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL,  60, 48, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 110, 48, 40, 14
+}
+
+TANKNUMB DIALOG 6, 15, 114, 49
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Select a Tank to Modify"
+FONT 9, "System"
+{
+ LTEXT "&Tank number", DLGTEXT +0, 4, 12, 43, 8
+ EDITTEXT              DLGEDIT +0, 59, 10, 20, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Edit",   DLGPBF +0, 81, 10, 30, 12
+ PUSHBUTTON "+", DLGINC, 51, 9, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "-", DLGDEC, 51, 19, 7, 7
+ PUSHBUTTON "&Quit", IDCANCEL, 12, 31, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Help",   IDHELP, 62, 31, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+}
+
+EDITSTRI DIALOG 34, 80, 240, 116
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Stringer Definition"
+BEGIN
+	LTEXT "higher indexed &Line", DLGTEXT +0, 3, 7, 51, 16, WS_CHILD | WS_VISIBLE | WS_GROUP
+	EDITTEXT DLGEDIT +0, 67, 6, 17, 12
+	PUSHBUTTON "+", DLGINC, 57,  4, 7, 7, BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	PUSHBUTTON "-", DLGDEC, 57, 14, 7, 7
+	LTEXT "&Width", DLGTEXT +1, 3, 29, 20, 8
+	EDITTEXT DLGEDIT +1, 45, 28, 39, 12
+	LTEXT "&Thickness", DLGTEXT +2, 3, 47, 35, 8
+	EDITTEXT DLGEDIT +2, 45, 46, 39, 12
+	LTEXT "STRINGER SEQUENCE:", -1, 94, 4, 89, 8
+	RADIOBUTTON "&Back (up) from higher-indexed", DLGRBN1 +0,     94, 15, 107, 9
+	RADIOBUTTON "&Forward (down) from lower-indexed", DLGRBN1 +1, 94, 25, 122, 10
+	LTEXT "BASIS FOR SPACING:", -1, 94, 38, 94, 8
+	RADIOBUTTON "&Uniform intervals", DLGRBN2 +0, 94, 54, 68, 14
+	RADIOBUTTON "fixed &Number",      DLGRBN2 +1, 94, 68, 68, 14
+
+	CTEXT "&Number of stringers", DLGTEXT +3, 160, 46, 80,  8
+	EDITTEXT                      DLGEDIT +3, 180, 56, 40, 12
+	CTEXT "&Fraction to first",   DLGTEXT +4, 160, 70, 80,  8
+	EDITTEXT                      DLGEDIT +4, 180, 80, 40, 12
+
+	DEFPUSHBUTTON "&Ok",  IDOK,     42, 98, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 92, 98, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  142, 98, 40, 14
+END
+
+
+DEVESTRI DIALOG 49, 41, 148, 102
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Develop a Stringer"
+{
+ LTEXT "&Number of higher-indexed line", DLGTEXT +0, 4, 5, 98, 8
+ LTEXT "&Index of stringer between pair", DLGTEXT +1, 4, 19, 99, 8
+ EDITTEXT DLGEDIT +0, 124,  4, 20, 12, WS_BORDER | WS_TABSTOP
+ EDITTEXT DLGEDIT +1, 124, 18, 20, 12, WS_BORDER | WS_TABSTOP
+ RADIOBUTTON "&False development", DLGRBN1 +0, 36, 33, 80, 10
+ RADIOBUTTON "&True development",  DLGRBN1 +1, 36, 46, 70, 10
+ CTEXT "Beware - true development is unlikely to work - see Help for an explanation", -1, 6, 62, 136, 20
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 4, 60, 140, 20
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 84, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 84, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 84, 40, 14
+}
+
+TANKLIST DIALOG 73, 74, 304, 166
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Defined Internal Tanks"
+{
+ DEFPUSHBUTTON "&Ok", IDOK, 132, 146, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ LISTBOX DLGLBX +0, 4, 14, 295, 126, LBS_NOTIFY | LBS_USETABSTOPS | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ LTEXT "Number   Lines    Sections     Side        Volume    Sp.Grav   % Full,Contents,Permeability", -1, 5, 4, 288, 9
+}
+
+STATCALI DIALOG 76, 67, 184, 100
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Tank Calibrations"
+BEGIN
+	LTEXT "&Tank number", DLGTEXT +0, 6, 6, 43, 8
+	EDITTEXT DLGEDIT +0, 60, 5, 20, 12
+	RADIOBUTTON "&Show on-screen",     DLGRBN1 +0, 6, 32, 61, 10
+	RADIOBUTTON "&Plot",               DLGRBN1 +1, 6, 42, 24, 10
+	RADIOBUTTON "&write to disk file", DLGRBN1 +2, 6, 52, 62, 10
+	LTEXT "&Interval", DLGTEXT +1, 92, 6, 39, 9
+	EDITTEXT DLGEDIT +1, 121, 5, 30, 12
+	RADIOBUTTON "level from &Volume", DLGRBN2 +0, 92, 19, 88, 10
+	RADIOBUTTON "level from &% full", DLGRBN2 +1, 92, 39, 65, 10
+	RADIOBUTTON "volume from &Level", DLGRBN2 +2, 92, 59, 79, 10
+	LTEXT "(interval is volume change)", -1, 92, 28, 89, 8
+	LTEXT "(interval is % of volume)", -1,   92, 48, 84, 8
+	LTEXT "(interval is depth change)", -1,  92, 68, 83, 8
+	CONTROL "+", DLGINC, "BUTTON", BS_PUSHBUTTON | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 52, 4, 7, 7
+	CONTROL "-", DLGDEC, "BUTTON", WS_CHILD | WS_VISIBLE | WS_TABSTOP, 52, 14, 7, 7
+	DEFPUSHBUTTON "&Ok",  IDOK,     22, 82, 40, 14
+	PUSHBUTTON "&Cancel", IDCANCEL, 72, 82, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  122, 82, 40, 14
+END
+#endif
+
+TOOLLOC DIALOG 19, 18, 148, 80
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+
+CAPTION "Toolbar Location"
+BEGIN
+	RADIOBUTTON "&Top",    DLGRBN1+0, 57,  6, 35, 10
+	RADIOBUTTON "&Bottom", DLGRBN1+1, 57, 20, 35, 10
+	RADIOBUTTON "&Left",   DLGRBN1+2, 57, 34, 35, 10
+	RADIOBUTTON "&Right",  DLGRBN1+3, 57, 48, 35, 10
+	DEFPUSHBUTTON "&Ok",  IDOK,      4, 62, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	PUSHBUTTON "&Cancel", IDCANCEL, 54, 62, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 62, 40, 14
+END
+
+
+ARRANGE DIALOG 104, 90, 116, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Arranging Toolbar Items"
+{
+ CTEXT "", 100, 12, 5, 92, 36, WS_CHILD | WS_VISIBLE | WS_GROUP
+}
+
+#ifdef PLATEDEV
+QUERYUNDO DIALOG 18, 18, 108, 37
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Undo a Ruling Line ..."
+BEGIN
+	CTEXT "Remove the highlighted line?", -1, 4, 4, 100, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	DEFPUSHBUTTON "&Yes", IDOK,      9, 18, 40, 14
+	PUSHBUTTON    "&No",  IDCANCEL, 59, 18, 40, 14
+END
+#endif
+
+#ifdef PROF
+TABUVARI DIALOG 18, 18, 164, 117
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Output Variables"
+{
+ LTEXT "&Available", 105, 6, 2, 31, 8
+ LISTBOX DLGLBX +0, 6, 13, 52, 80, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ PUSHBUTTON "&>", DLGPBF +0, 60, 34, 14, 14
+ PUSHBUTTON "&<", DLGPBF +1, 60, 52, 14, 14
+ LTEXT "&Selected", 106, 77, 2, 31, 8
+ LISTBOX DLGLBX + 1, 77, 13, 52, 80, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL
+ LTEXT "Move..", -1, 132, 20, 26, 8
+ PUSHBUTTON "&Up",   DLGPBF +2, 134, 39, 25, 14
+ PUSHBUTTON "&Down", DLGPBF +3, 134, 57, 25, 14
+ DEFPUSHBUTTON "&Ok",      IDOK,  12, 97, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL,  62, 97, 40, 14
+ PUSHBUTTON "&Help",     IDHELP, 112, 97, 40, 14
+}
+#endif
+
+CONFSTYL DIALOG 18, 18, 129, 101
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Line Styles"
+{
+ PUSHBUTTON "&Sections",   DLGPBF +0, 4,  4, 72, 12
+ PUSHBUTTON "&Lines",      DLGPBF +1, 4, 24, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Waterlines", DLGPBF +2, 4, 44, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Buttocks",   DLGPBF +3, 4, 64, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Diagonals",  DLGPBF +4, 4, 84, 72, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Quit", IDOK, 84, 34, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Help",  IDHELP, 84, 54, 40, 14
+}
+
+TANKSELECT DIALOG 48, 47, 148, 138
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Select One Tank for Editing"
+FONT 10, "System"
+{
+ CTEXT "Defined Tanks",       -1,4, 4,140, 10
+ LISTBOX               DLGLBX +0,4,16,140,100, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",      IDOK,  4,120, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54,120, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104,120, 40, 14
+}
+
+EDITSHOW DIALOG 48, 47, 121, 82
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Enter Hull Details to Show"
+FONT 10, "System"
+{
+ LTEXT "&Sections",  DLGTEXT +0, 4, 5, 31, 8
+ EDITTEXT            DLGEDIT +0, 37, 3, 80, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&Lines",     DLGTEXT +1, 4, 19, 22, 8
+ EDITTEXT            DLGEDIT +1, 37, 17, 80, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+#ifdef PROF
+ CHECKBOX "&Port tanks",      DLGLOG +0, 4, 33, 58, 12
+ CHECKBOX "s&Tarboard tanks", DLGLOG +1, 4, 45, 64, 12
+ PUSHBUTTON "Select Tank",  DLGPBF + 0, 70,39,47,12
+#endif
+ DEFPUSHBUTTON "&Ok",      IDOK,  5, 62, 30, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 45, 62, 30, 14
+ PUSHBUTTON "&Help",     IDHELP, 85, 62, 30, 14
+}
+
+EDITSECTIONS DIALOG 48, 47, 148, 59
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Enter Hull Sections to Edit"
+FONT 10, "System"
+{
+ LTEXT "&Sections",  DLGTEXT +0, 4, 5, 31, 8
+ EDITTEXT            DLGEDIT +0, 37, 3, 94, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+#ifdef PROF
+ PUSHBUTTON "Select Tank",  DLGPBF + 0, 49,20,50,14
+#endif
+ DEFPUSHBUTTON "&Ok",      IDOK,  4, 39, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 39, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,104, 39, 40, 14
+}
+
+#ifdef PROF
+
+DELESTRI DIALOG 42, 64, 148, 118
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Delete stringers"
+FONT 9, "System"
+{
+ CTEXT "Select stringer set to delete", -1, 4, 4, 140, 10
+ LISTBOX DLGLBX +0, 4, 16, 140, 80, LBS_NOTIFY | WS_BORDER | LBS_DISABLENOSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 100, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 100, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 100, 40, 14
+}
+
+CONVERT DIALOG 6, 15, 148, 50
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Convert Monohull to Catamaran"
+FONT 9, "System"
+{
+ LTEXT "Distance from centreline to keels", -1, 20, 8, 65, 17
+ EDITTEXT DLGEDIT +0, 88, 10, 41, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      4, 32, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 32, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,  104, 32, 40, 14
+}
+
+
+MOVE DIALOG 39, 41, 136, 50
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Move Catamaran Hulls In or Out"
+FONT 9, "System"
+{
+ LTEXT "&Distance to move (positive outward, negative inward)", DLGTEXT +0, 3, 5, 89, 17
+ EDITTEXT DLGEDIT +0, 93, 8, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 12, 29, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 52, 29, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 93, 29, 30, 12
+}
+
+
+STABVARI DIALOG 6, 15, 140, 71
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Select the Stability Variable"
+FONT 9, "System"
+{
+ AUTORADIOBUTTON "&Righting moment", DLGRBN1 +0, 36, 6, 67, 12
+ AUTORADIOBUTTON "&GZ", DLGRBN1 +1, 36, 20, 67, 12
+ AUTORADIOBUTTON "&KN", DLGRBN1 +2, 36, 36, 67, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 19, 53, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 53, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 89, 53, 30, 12
+}
+
+TABUWARN DIALOG 6, 15, 161, 99
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "Tabular Output Settings"
+FONT 9, "System"
+{
+ CTEXT "The table requested will be calculated for the following centre of mass settings:", -1, 4, 2, 153, 17
+ LTEXT "&X-centre of mass (LCG)", DLGTEXT +0, 19, 24, 80, 8
+ EDITTEXT DLGEDIT +0, 102, 22, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-centre of mass (VCG)", DLGTEXT +1, 19, 38, 79, 8
+ EDITTEXT DLGEDIT +1, 102, 36, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Displacement", DLGTEXT +2, 19, 52, 60, 8
+ EDITTEXT DLGEDIT +2, 102, 50, 40, 12, WS_BORDER | WS_TABSTOP
+ CHECKBOX "&Do not show this warning again this session", DLGLOG +0, 4, 66, 153, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 25, 82, 30, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 65, 82, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 105, 82, 30, 14
+}
+#endif
+
+EVALWARN DIALOG 29, 55, 166, 53
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Evaluate Hull Statics"
+FONT 9, "System"
+{
+ DEFPUSHBUTTON "&Yes", IDOK, 33, 36, 30, 12
+ PUSHBUTTON "&No", IDCANCEL, 68, 36, 30, 12
+ PUSHBUTTON "&Help", IDHELP,103, 36, 30, 12
+ CTEXT "This menu item will alter the displacement and LCG of your hull. Is this what you want?", -1, 1, 18, 159, 16
+ CHECKBOX "Do not show this warning again this session", DLGLOG +0, 5, 2, 153, 11
+}
+
+OFFSWARN DIALOG 85, 46, 163, 92
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+
+CAPTION "OFFSET DEFINITION - WARNING"
+FONT 9, "System"
+{
+ CTEXT "You have created a negative lateral offset at", -1, 5, 2, 153, 9
+ CTEXT "", DLGSTAT +0, 9, 14, 144, 8
+ CTEXT "This may cause problems in line fairing and hydrostatics", -1, 5, 26, 153, 17
+ CHECKBOX "&Do not show this warning again this session", DLGLOG +0, 4, 44, 153, 12
+ CHECKBOX "&Fix it by making it zero", DLGLOG +1, 4, 56, 149, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 25, 72, 30, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 65, 72, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 105, 72, 30, 14
+}
+
+
+WEBWARN DIALOG 37, 22, 161, 72
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+
+CAPTION "Zero-Thickness Warning"
+FONT 12, "MS Sans Serif"
+{
+ CHECKBOX "&Include such surfaces during this session", DLGLOG +0, 11, 38, 139, 12
+ CTEXT "Your design includes a zero-thickness web at the hull centreline. By default, these are omitted from all surface area calculations.", -1, 4, 5, 153, 27
+ DEFPUSHBUTTON "&Ok", IDOK, 25, 53, 30, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 65, 53, 30, 14
+ PUSHBUTTON "&Help", IDHELP, 105, 53, 30, 14
+}
+
+newEDITRESE DIALOG 90, 65, 260, 154
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "Alter Hull Sectioning"
+FONT 9, "System"
+{
+ LTEXT "nUmber of sections", DLGSTAT +0, 5,5,37,18
+ EDITTEXT DLGEDIT +0, 57, 6, 18, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "New sections:", DLGSTAT +2, 80, 9, 50, 10
+ LISTBOX DLGLBX +0, 80, 20, 100, 91, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL
+ PUSHBUTTON "Retain Stem", DLGPBF +0, 5,30,60,16
+ PUSHBUTTON "Interpolate stem", DLGPBF +1, 5,55,60,16
+ LTEXT "Ignore sections:", DLGSTAT +1, 5,117,70,10
+ EDITTEXT DLGEDIT +1, 70, 115, 120, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "Add position:", DLGPBF +2, 193,30,60,16
+ EDITTEXT DLGEDIT +2, 202,52,40,12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "Delete selections", DLGPBF +3, 193,77,60,16
+ PUSHBUTTON "Reset", DLGPBF +4, 5,90,60,16
+ PUSHBUTTON "+", DLGINC, 46,2,7,7
+ PUSHBUTTON "-", DLGDEC, 46,12,7,7
+ DEFPUSHBUTTON "&Ok",  IDOK,      60, 134, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 110, 134, 40, 14
+ PUSHBUTTON "&Help",   IDHELP,   160, 134, 40, 14
+}
+
+#ifdef DEMO
+
+DEMO1 DIALOG 76, 75, 226, 145
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "This demonstration is a hands-on experience, but you can accept some initial guidance on the way the program works, if you like.\n\nDo you want some help?", -1, 9, 3, 208, 41
+ PUSHBUTTON "Please show me how to start a new design", DLGPBF+0, 9, 48, 208, 12
+ PUSHBUTTON "Please show me how to find out about a design's hydrostatics", DLGPBF+1, 9, 64, 208, 12
+#ifdef PLATEDEV
+ PUSHBUTTON "Please show me how to use the plate development feature", DLGPBF+2, 9, 80, 208, 12
+#endif
+#ifdef EXT_OR_PROF
+ PUSHBUTTON "I would like to know more about DXF output", DLGPBF+3, 9, 96, 208, 12
+#endif
+ DEFPUSHBUTTON "&No, I know what I want to do", IDCANCEL, 9, 121, 208, 12
+}
+
+
+DEMO_0_1 DIALOG 6, 75, 188, 72
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "To start a new design, you select the File, New menu item, or the pencil-and-blank-paper toolbar icon.", -1, 2, 3, 184, 18
+ DEFPUSHBUTTON "&Continue", IDOK, 50, 54, 40, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 95, 54, 40, 12
+ LTEXT "Use the Help button you see in the following dialog box, to ensure you enter useful values - or just accept the defaults shown.", -1, 2, 22, 184, 29
+}
+
+
+DEMO_0_2 DIALOG 6, 75, 188, 65
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Behind this message you can see the result of your attempt. It may be good enough for what you want, or it may not.\n\nDo you want to try again?", -1, 4, 3, 179, 42
+ DEFPUSHBUTTON "&Yes", IDOK, 35, 47, 30, 12
+ PUSHBUTTON "&No, I am happy with it", IDCANCEL, 70, 47, 82, 12
+}
+
+
+DEMO_1_3 DIALOG 7, 29, 199, 109
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "In the following example, a heel of 20 degrees has been set. Notice how righting moment, and most other terms, respond.", -1, 7, 57, 185, 29
+ DEFPUSHBUTTON "&Continue", IDOK, 56, 90, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 100, 90, 40, 12
+ LTEXT "Once you have defined the displacement and LCG of the hull (as Statics, Evaluate does, or as is already defined for a design you have read in), you can investigate the effects of changes to heel on hydrostatic parameters. This is done by setting a heel value using Statics, Settings, and then selecting Statics, Balance hull.", -1, 7, 3, 185, 55
+}
+
+
+DEMO_0_3 DIALOG 7, 29, 199, 132
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "You now have a usable design, but it is unlikely to match what you really want. The two main design editing tools are under the Edit menu, 'Edit sections' and 'Smooth a line'.", -1, 7, 3, 185, 33
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 112, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 112, 40, 12
+ LTEXT "After that, please browse through the rest of the program at your own pace. There is a lot to see.", -1, 7, 85, 185, 21
+ LTEXT "In the following, you will be see use of the Edit sections menu item. You will see the hull in an oblique view. Try 'dragging' the hull lines (to whatever shape you like), then exit. You can view the result after selecting 'quit' from the top menu of the Edit window.", -1, 7, 40, 185, 43
+}
+
+
+DEMO_1_1 DIALOG 7, 29, 199, 89
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "You must firstly open an existing design, using menu item File, Open - or press the hull+uparrow+disk toolbar button.", -1, 7, 3, 185, 27
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 72, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 72, 40, 12
+ LTEXT "You can use the file dialog box to browse through the directories in your demonstration set, to find the Hullform hull data files in the sample set. Select one, and you can proceed using it.", -1, 7, 31, 185, 37
+}
+
+
+DEMO_1_2 DIALOG 6, 75, 188, 98
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Once your design is loaded, you can investigate many aspects. The logical start point is its hydrostatics.", -1, 3, 3, 184, 20
+ DEFPUSHBUTTON "&Continue", IDOK, 50, 80, 40, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 95, 80, 40, 12
+ LTEXT "Once the design has reached a balanced state, you are shown a summary of its hydrostatic characteristics.", -1, 3, 51, 184, 21
+ LTEXT "To do this, you must 'float' the hull. This is achieved using the programs Statics, Balance hull menu item - or by pressing the 'inclined hull' toolbar button.", -1, 3, 23, 184, 28
+}
+
+
+DEMO10 DIALOG 6, 75, 177, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "In this version, you can access Hullstat using the Statics, Report menu item. Alternately, you can look over the design aspects of the program.\n\nIt is a good idea to check out Hullform first.\n\nDo you want to try Hullstat now?", -1, 5, 3, 169, 58
+ DEFPUSHBUTTON "&No", IDOK, 91, 65, 40, 12
+ PUSHBUTTON "&Yes", IDCANCEL, 46, 65, 40, 12
+}
+
+
+HSTDEMO DIALOG 6, 15, 231, 128
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Hullstat Demonstration"
+FONT 9, "System"
+{
+ DEFPUSHBUTTON "&Continue", IDCANCEL, 96, 113, 39, 12
+ LTEXT "The demonstration version of Hullstat will only work with one provided design, hst-demo.hud.", -1, 7, 4, 220, 18
+ LTEXT "You should not try to rename an existing design to this name, nor attempt to edit the design. If you do, the changes will be detected, and Hullstat will not run.", -1, 7, 26, 220, 26
+ LTEXT "To use Hullstat, open a project, then press the File List button, and ensure the files nominated are located where the program can find them. Then press the Run a Template button, and select a template and provide an output file name.", -1, 7, 55, 220, 35
+ LTEXT "Remember, the Help button is always there.", -1, 7, 91, 220, 17
+}
+
+INFO DIALOG 15, 37, 157, 74
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "Hullform Demonstration"
+FONT 12, "Arial"
+{
+ PUSHBUTTON "&Ok", IDOK, 112, 57, 40, 14
+ CHECKBOX "Don't show these messages", DLGLOG, 4, 58, 107, 12
+ LTEXT "Text", DLGSTAT, 7, 4, 143, 50
+}
+DEMO_2_2 DIALOG 7, 29, 199, 52
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Firstly, choose the line pair to use, by entering the index number of the higher-indexed line, using the 'Lines' menu item.", -1, 7, 3, 185, 27
+ DEFPUSHBUTTON "&Continue", IDOK, 56, 34, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 100, 34, 40, 12
+}
+
+DEMO_2_3 DIALOG 7, 29, 199, 74
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Ensure that your calculations will have adequate detail - set the number of points between hull sections from which ruling lines are calculated using the 'Configure, Extra Drawing Points' menu item. The number of points drawn between sections controls the number of lines calculated between sections.", -1, 7, 3, 185, 51
+ DEFPUSHBUTTON "&Continue", IDOK, 56, 57, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 100, 57, 40, 12
+}
+
+
+DEMO_2_4 DIALOG 7, 29, 199, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Ensure that there will be a useful number of lines drawn from the stem and transom ends of the surface using the 'Transom/stem Lines' menu item.", -1, 7, 3, 185, 29
+ DEFPUSHBUTTON "&Continue", IDOK, 56, 35, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 100, 35, 40, 12
+}
+
+DEMO_2_1 DIALOG 7, 29, 199, 125
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "You must firstly open an existing design, using menu item File, Open - or press the hull+uparrow+disk toolbar button.", -1, 7, 3, 185, 27
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 103, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 103, 40, 12
+ LTEXT "You can use the file dialog box to browse through the directories in your demonstration set, to find the Hullform hull data files in the sample set. Select one, and you can proceed using it.", -1, 7, 31, 185, 38
+ LTEXT "NOTE that a suitable developable design is needed - the one entitled 'planing' or 'planing hull' is recommended.", -1, 7, 69, 185, 21
+}
+
+DEMO_2_5 DIALOG 7, 29, 199, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Next, you use the 'Evaluate' menu item to perform the calculations.", -1, 7, 3, 185, 29
+ DEFPUSHBUTTON "&Continue", IDOK, 56, 35, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 100, 35, 40, 12
+}
+
+DEMO_2_6 DIALOG 7, 29, 229, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "The following step is to use the 'Plot rulings' menu item, to view the results and to eliminate any duplications. For each duplication - that is, for each case where more than one ruling line can be drawn from a point on the border of the surface - you are asked to choose which (first, second or neither) to accept.\n\nFor this initial exercise, simply select the first whenever you are offered a choice.", -1, 7, 3, 215, 69
+ DEFPUSHBUTTON "&Continue", IDOK, 72, 75, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 116, 75, 40, 12
+}
+DEMO_2_7 DIALOG 78, 40, 246, 139
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Once you have confirmed the validity of the calculated rulings, you can consider yourself whether the surface is actually developable. The criteria are:", -1, 7, 3, 234, 27
+ DEFPUSHBUTTON "&Continue", IDOK, 81, 118, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 125, 118, 40, 12
+ LTEXT "1. No more than one ruling from each point on the boundary of the surface;\n\n2. No two rulings may cross (with exceptions (a) if a surface is close to flat, rulings may be drawn across each other due to small truncation errors in the calculation process and (b) small crossovers near the boundary may not be significant);\n\n3. There are no gaps where ruling lines could not be found.", -1, 7, 33, 234, 75
+}
+DEMO_2_8 DIALOG 7, 29, 298, 133
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "If rulings cross, the cause may be excessive curvature of the line at the boundary near the region where they cross - check this using the ""Edit, Smooth a Line"" menu item;\n\nIf rulings are absent, the cause may be insufficient curvature of the line at the boundary where the gap occurs, or excessive curvature at the boundary on the other side of the gap - again, check this using the ""Edit, Smooth a Line"" menu item;", -1, 7, 3, 284, 53
+ DEFPUSHBUTTON "&Continue", IDOK, 107, 115, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 151, 115, 40, 12
+ LTEXT "If rulings are absent, the cause may be insufficient curvature of the line at the boundary where the gap occurs, or excessive curvature at the boundary on the other side of the gap - again, check this using the 'Edit, Smooth a Line' menu item;\n\nIf there are ruling lines missing from the transom boundary, check that you have some curvature in the transom - menu item,", -1, 7, 56, 284, 52
+}
+
+DEMO_2_9 DIALOG 7, 29, 198, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "When your ruling lines look correct, you can view the form of the metal or plywood sheet you need to construct the surface using menu item 'Rollout'.", -1, 5, 3, 188, 29
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 36, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 36, 40, 12
+}
+
+
+DEMO_2_10 DIALOG 7, 29, 233, 74
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "Once the Rollout view is on-screen, you can print it using menu item 'File, Print', or copy it to a DXF file using 'File, Plot'.\n\nFor example, what follows is the File, Plot dialog box, properly set up for DXF output of your developed plate ...", -1, 6, 3, 221, 49
+ DEFPUSHBUTTON "&Continue", IDOK, 74, 53, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 118, 53, 40, 12
+}
+
+
+DEMO_3_1 DIALOG 7, 29, 177, 109
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "There are two ways of generating DXF file output from Hullform\n\n1. Use menu item File, DXF output\n\n2. Display any graphical view on-screen, and\n    select menu item File, Plot.\n\nFirstly, we will generate a simple hull design, and then you will be led through each process.", -1, 8, 3, 161, 83
+ DEFPUSHBUTTON "&Continue", IDOK, 46, 89, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 90, 89, 40, 12
+}
+
+DEMO_3_3 DIALOG 7, 29, 237, 100
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "NOTE that Hullform supports multiple drawing layers, each corresponding to one drawing colour - you can use numbered or text-labelled layers, depending on the requirements of your CAD system. You can specify the drawing format, label format and the frame details from within the DXF dialog box.", -1, 7, 35, 221, 42
+ DEFPUSHBUTTON "&Continue", IDOK, 76, 82, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 120, 82, 40, 12
+ LTEXT "Menu option File, DXF Output is the 'main' way of generating a DXF file. You can use it to produce a two- or three-dimensional view, with all frame details supported by the program.", -1, 7, 4, 221, 29
+}
+DEMO_3_4 DIALOG 7, 29, 199, 89
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "The other DXF output option comes from inclusion of the DXF format as a 'plotter' device - directed to a file, of course.\n\nOnce you have displayed a graphical view on-screen, you can generate a DXF copy using menu item File, Plot.\n\nFirstly, we will show a body-plan view on the screen.", -1, 7, 3, 185, 65
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 72, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 72, 40, 12
+}
+
+DEMO_3_2 DIALOG 133, 75, 188, 73
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "To start a new design, you select the File, New menu item, or the pencil-and-blank-paper toolbar icon.\n\nFor this exercise, just press the OK button in the following dialog box.", -1, 10, 3, 167, 48
+ DEFPUSHBUTTON "&Continue", IDOK, 50, 57, 40, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 95, 57, 40, 12
+}
+
+
+DEMO_3_5 DIALOG 7, 29, 199, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Hullform Demonstration"
+{
+ LTEXT "The File, Plot menu item now allows you to transmit the view to a range of plot devices - in the following, the correct choices for DXF output have been set.", -1, 7, 3, 185, 29
+ DEFPUSHBUTTON "&Continue", IDOK, 57, 36, 39, 12
+ PUSHBUTTON "&Stop", IDCANCEL, 101, 36, 40, 12
+}
+
+#endif
+
+#ifdef HULLSTAT
+CONDEDIT DIALOG 4, 16, 176, 150
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Edit an Operating Condition"
+FONT 9, "System"
+{
+ LTEXT "&Condition", DLGTEXT +0, 3, 3, 39, 8
+ EDITTEXT DLGEDIT +0, 38, 2, 135, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&State", DLGTEXT +1, 3, 17, 28, 8
+ EDITTEXT DLGEDIT +1, 38, 16, 135, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "Static loads", -1, 28, 33, 41, 8
+ LISTBOX DLGLBX +0, 3, 58, 84, 76, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ PUSHBUTTON "&Add", DLGPBF +0, 3, 43, 24, 12
+ PUSHBUTTON "&Remove", DLGPBF +1, 30, 43, 30, 12
+ PUSHBUTTON "&Edit", DLGPBF +2, 63, 43, 24, 12
+ LTEXT "Tanks", -1, 120, 33, 23, 8
+ LISTBOX DLGLBX +1, 90, 58, 83, 76, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "e&Dit", DLGPBF +3, 115, 43, 29, 12
+ PUSHBUTTON "&Quit", IDOK, 52, 135, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 94, 135, 30, 12
+}
+
+
+
+IMMEEDIT DIALOG 18, 18, 108, 104
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Immersion Point"
+FONT 9, "System"
+{
+ LTEXT "&Description:", DLGTEXT +0, 6, 3, 42, 8
+ EDITTEXT DLGEDIT +0, 4, 15, 100, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "Position:", DLGSTAT +0, 6, 31, 73, 8
+ LTEXT "&X-position", DLGTEXT +1, 6, 45, 55, 8
+ EDITTEXT DLGEDIT +1, 62, 43, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Y-position", DLGTEXT +2, 6, 59, 36, 8
+ EDITTEXT DLGEDIT +2, 62, 57, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-position", DLGTEXT +3, 6, 73, 55, 8
+ EDITTEXT DLGEDIT +3, 62, 71, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 3, 88, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 39, 88, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 75, 88, 30, 12
+}
+
+
+COND DIALOG 31, 21, 109, 122
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Edit Hull Condition Details"
+FONT 9, "System"
+{
+ LTEXT "&Condition", DLGLBX -30, 4, 3, 34, 8
+ PUSHBUTTON "&Edit", DLGPBF +2, 74, 90, 30, 12
+ PUSHBUTTON "&Delete", DLGPBF +1, 39, 90, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Quit", IDOK, 22, 106, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 57, 106, 30, 12
+ LISTBOX DLGLBX +0, 3, 12, 102, 77, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL
+ PUSHBUTTON "&Add", DLGPBF +0, 4, 90, 30, 12
+}
+
+PREF DIALOG 9, 18, 184, 128
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "User Preferences"
+FONT 9, "System"
+{
+ LTEXT "Progress Display", -1, 7, 4, 33, 17
+ RADIOBUTTON "&None", DLGRBN1 +0, 52, 4, 53, 10
+ RADIOBUTTON "&Loops", DLGRBN1 +1, 52, 13, 28, 10
+ RADIOBUTTON "&Enacted commands", DLGRBN1 +2, 98, 4, 73, 10
+ RADIOBUTTON "&All commands", DLGRBN1 +3, 98, 13, 56, 10
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 3, 178, 20
+ CHECKBOX "use RT&F format for templates and output", DLGLOG +0, 7, 26, 139, 12
+ LTEXT "Graphic Format", -1, 7, 42, 28, 18
+ AUTORADIOBUTTON "&Windows metafile", DLGRBN2 +0, 52, 45, 69, 12
+ AUTORADIOBUTTON "H&PGL", DLGRBN2 +1, 125, 45, 37, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 41, 178, 20
+ LTEXT "&Text data size", DLGTEXT +0, 7, 64, 32, 17
+ EDITTEXT DLGEDIT +0, 43, 67, 20, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Symbol table size", DLGTEXT +1, 94, 64, 37, 15
+ EDITTEXT DLGEDIT +1, 135, 67, 24, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "p&Roject directory", DLGTEXT +2, 7, 86, 32, 21
+ EDITTEXT DLGEDIT +2, 43, 89, 95, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse", DLGPBF +0, 142, 89, 36, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 85, 178, 20
+ DEFPUSHBUTTON "&Ok", IDOK, 42, 110, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 77, 110, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 112, 110, 30, 12
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 63, 178, 20
+ CONTROL "", -1, "static", SS_BLACKFRAME | WS_CHILD | WS_VISIBLE, 3, 25, 178, 14
+}
+
+DLGHULLSTAT DIALOG 8, 28, 253, 156
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Hullstat"
+FONT 9, "System"
+{
+ CTEXT "PROJECT FILE", -1, 4, 2, 74, 8
+ PUSHBUTTON "&New project",       DLGPBF+0, 4, 12, 74, 12
+ PUSHBUTTON "&Open project",      DLGPBF+1, 4, 26, 74, 12
+ PUSHBUTTON "&Save project",      DLGPBF+2, 4, 40, 74, 12
+ PUSHBUTTON "save &As ...",       DLGPBF+3, 4, 54, 74, 12
+ PUSHBUTTON "edit &Project file", DLGPBF+4, 4, 68, 74, 12
+
+ CTEXT "PROJECT CONTENTS", -1, 89, 2, 74, 8
+ PUSHBUTTON "&File list",            DLGPBF+5, 89, 12, 74, 12
+ PUSHBUTTON "static &Load list",     DLGPBF+6, 89, 26, 74, 12
+ PUSHBUTTON "&Immersion point list", DLGPBF+7, 89, 40, 74, 12
+ PUSHBUTTON "operating &Conditions", DLGPBF+8, 89, 54, 74, 12
+ PUSHBUTTON "&Graphical edit",       DLGPBF+9, 89, 68, 74, 12
+
+ CTEXT "TEMPLATE", -1, 174, 2, 74, 8
+ PUSHBUTTON "&Run a template", DLGPBF+10, 174, 12, 74, 12
+ PUSHBUTTON "s&Top",           DLGPBF+11, 174, 26, 74, 12
+ PUSHBUTTON "edit t&Emplate",  DLGPBF+12, 174, 40, 74, 12
+ PUSHBUTTON "edit o&Utput",    DLGPBF+13, 174, 54, 74, 12
+
+ LISTBOX DLGLBX +0, 4, 85, 193, 68, 0xa00001
+
+ PUSHBUTTON "pr&Eferences",    DLGPBF+14, 202, 93,  46, 12
+ PUSHBUTTON "&Help",           DLGPBF+15, 202, 113, 46, 12
+
+ PUSHBUTTON "e&Xit",IDCANCEL,  202, 131, 46, 12
+}
+
+IMME DIALOG 52, 56, 132, 130
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Immersion Point Operations"
+FONT 9, "System"
+{
+ LISTBOX DLGLBX +0, 2, 3, 80, 110, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL
+ PUSHBUTTON "&Add", DLGPBF +0, 88, 4, 40, 12
+ PUSHBUTTON "&Delete", DLGPBF +1, 88, 18, 40, 12
+ PUSHBUTTON "&Edit", DLGPBF +2, 88, 32, 40, 12
+ PUSHBUTTON "&Help", IDHELP, 68, 113, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Quit", IDOK, 33, 113, 30, 12
+}
+
+LOAD DIALOG 6, 15, 135, 130
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Static Loads"
+FONT 9, "System"
+{
+ LISTBOX DLGLBX +0, 4, 4, 80, 110, LBS_NOTIFY | WS_BORDER | WS_BORDER | WS_VSCROLL
+ PUSHBUTTON "&Add", DLGPBF +0, 90, 4, 40, 12
+ PUSHBUTTON "&Delete", DLGPBF +1, 90, 18, 40, 12
+ PUSHBUTTON "&Edit", DLGPBF +2, 90, 32, 40, 12
+ PUSHBUTTON "&Help", IDHELP, 70, 114, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ DEFPUSHBUTTON "&Quit", IDOK, 35, 114, 30, 12
+}
+
+LOADPOS DIALOG 8, 22, 113, 156
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+CAPTION "Static Load Position"
+FONT 9, "System"
+{
+ LTEXT "&Description", DLGTEXT +0, 5, 2, 40, 8
+ EDITTEXT DLGEDIT +0, 5, 12, 102, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&X-position (LCG)", DLGTEXT +1, 8, 42, 55, 8
+ EDITTEXT DLGEDIT +1, 64, 40, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Y-position", DLGTEXT +2, 8, 56, 36, 8
+ EDITTEXT DLGEDIT +2, 64, 54, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-position (VCG)", DLGTEXT +3, 8, 70, 55, 8
+ EDITTEXT DLGEDIT +3, 64, 68, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Mass", DLGTEXT +4, 8, 84, 49, 8
+ EDITTEXT DLGEDIT +4, 64, 82, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Length", DLGTEXT +5, 8, 98, 49, 8
+ EDITTEXT DLGEDIT +5, 64, 96, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Width", DLGTEXT +6, 8,112, 49, 8
+ EDITTEXT DLGEDIT +6, 64,110, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Depth", DLGTEXT +7, 8, 126, 49, 8
+ EDITTEXT DLGEDIT +7, 64,124, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 5,141, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 41,141, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 77,141, 30, 12
+ LTEXT "Default Values:", -1, 8, 29, 64, 8
+}
+
+CONDADD DIALOG 32, 62, 161, 50
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Add a New Operating Condition"
+FONT 9, "System"
+{
+ DEFPUSHBUTTON "&Ok", IDOK, 29, 34, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 65, 34, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 101, 34, 30, 12
+ LTEXT "&Condition", DLGTEXT +0, 3, 5, 34, 8
+ EDITTEXT DLGEDIT +0, 38, 4, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&State", -1, 3, 19, 27, 8
+ EDITTEXT DLGEDIT +1, 38, 18, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+}
+
+CONDLOAD DIALOG 6, 15, 169, 95
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Load State for One Operating Condition"
+FONT 9, "System"
+{
+ CTEXT "Text", DLGSTAT +0, 3, 4, 155, 8
+ LTEXT "&X-position (LCG)", DLGTEXT +0, 5, 18, 55, 8
+ EDITTEXT DLGEDIT +0, 61, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Y-position", DLGTEXT +1, 5, 32, 36, 8
+ EDITTEXT DLGEDIT +1, 61, 30, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-position (VCG)", DLGTEXT +2, 5, 46, 55, 8
+ EDITTEXT DLGEDIT +2, 61, 44, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Mass", DLGTEXT +3, 5, 64, 32, 8
+ EDITTEXT DLGEDIT +3, 61, 62, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 33, 79, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 69, 79, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 105, 79, 30, 12
+ LTEXT "Apply for this load to all operating conditions", -1, 104, 20, 44, 33
+ LTEXT "Specific to this operating condition", -1, 104, 60, 63, 16
+}
+
+CONDTANK DIALOG 129, 85, 139, 77
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Tank State for One Operating Condition"
+FONT 9, "System"
+{
+ CTEXT "Text", DLGSTAT +0, 8, 5, 122, 7
+ LTEXT "&Percent full", DLGTEXT +0, 21, 18, 55, 8
+ EDITTEXT DLGEDIT +0, 77, 16, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Specific gravity", DLGTEXT +1, 21, 32, 54, 8
+ EDITTEXT DLGEDIT +1, 77, 30, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Permeability", DLGTEXT +2, 21, 46, 44, 8
+ EDITTEXT DLGEDIT +2, 77, 44, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 18, 61, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 54, 61, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 90, 61, 30, 12
+}
+
+
+
+THREEVAL DIALOG 59, 46, 167, 97
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Enter Three Numerical Values"
+FONT 9, "System"
+{
+ LTEXT "", DLGSTAT +0, 4, 5, 114, 22
+ EDITTEXT DLGEDIT +0, 122, 5, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "", DLGSTAT +1, 4, 29, 113, 20
+ EDITTEXT DLGEDIT +1, 122, 29, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "", DLGSTAT +2, 4, 58, 112, 18
+ EDITTEXT DLGEDIT +2, 122, 56, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 33, 80, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 68, 80, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 103, 80, 30, 12
+}
+
+
+TWOVAL DIALOG 59, 46, 167, 80
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Enter Two Numerical Values"
+FONT 9, "System"
+{
+ LTEXT "", DLGSTAT +0, 4, 5, 110, 29
+ EDITTEXT DLGEDIT +0, 120, 7, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "", DLGSTAT +1, 6, 34, 108, 28
+ EDITTEXT DLGEDIT +1, 120, 35, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 33, 63, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 68, 63, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 103, 63, 30, 12
+}
+
+
+ONEVAL DIALOG 59, 46, 137, 44
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Enter One Numerical Value"
+FONT 9, "System"
+{
+ LTEXT "", DLGSTAT +0, 5, 6, 85, 20
+ EDITTEXT DLGEDIT +0, 94, 5, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 18, 28, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 53, 28, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 88, 28, 30, 12
+}
+
+
+TMPLOUTP DIALOG 6, 15, 262, 147
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Specify Input Template and Output File"
+FONT 9, "System"
+{
+ CTEXT "Template", -1, 33, 1, 72, 8
+ CTEXT "Output file", -1, 157, 1, 72, 8
+ COMBOBOX DLGLBX +0,   6, 12, 118, 100, CBS_SIMPLE | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+ COMBOBOX DLGLBX +1, 136, 12, 118, 100, CBS_SIMPLE | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+ LTEXT "Template format:", -1, 38, 117, 60, 8
+ PUSHBUTTON "Switch to text format", DLGPBF +0, 6, 130, 100, 12
+ DEFPUSHBUTTON "&Ok", IDOK, 130, 130, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 175, 130, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 220, 130, 30, 12
+}
+
+
+
+STATEDIT MENU
+{
+ MENUITEM "&Profile", 101
+ MENUITEM "&Topview", 102
+ MENUITEM "&Endview", 103
+ MENUITEM "&Load", 104
+ MENUITEM "&Immersion-point", 105
+ MENUITEM "p&Roperties", 106
+ MENUITEM "&Double", 107
+ MENUITEM "&Half", 108
+ MENUITEM "&Quit", 109
+}
+LOADPROP DIALOG 6, 15, 186, 92
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Load Properties"
+FONT 8, "System"
+{
+ LTEXT "-", DLGSTAT +0, 5, 4, 178, 13
+ LTEXT "&X-position (LCG)", DLGTEXT +0, 5, 20, 55, 8
+ EDITTEXT DLGEDIT +0, 61, 18, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Y-position", DLGTEXT +1, 5, 34, 36, 8
+ EDITTEXT DLGEDIT +1, 61, 32, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-position (VCG)", DLGTEXT +2, 5, 48, 55, 8
+ EDITTEXT DLGEDIT +2, 61, 46, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Mass", DLGTEXT +3, 5, 62, 49, 8
+ EDITTEXT DLGEDIT +3, 61, 60, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Length", DLGTEXT +4, 108, 20, 26, 8
+ EDITTEXT DLGEDIT +4, 140, 18, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Width", DLGTEXT +5, 108, 34, 23, 8
+ EDITTEXT DLGEDIT +5, 140, 32, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Height", DLGTEXT +6, 108, 48, 27, 8
+ EDITTEXT DLGEDIT +6, 140, 46, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 45, 77, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 81, 77, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 117, 77, 30, 12
+}
+
+IMMEPROP DIALOG 42, 40, 110, 82
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Immersion Point Properties"
+FONT 9, "System"
+{
+ LTEXT "-", DLGSTAT +0, 7, 4, 99, 15
+ LTEXT "&X-position", DLGTEXT +0, 7, 24, 55, 8
+ EDITTEXT DLGEDIT +0, 63, 22, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Y-position", DLGTEXT +1, 7, 38, 36, 8
+ EDITTEXT DLGEDIT +1, 63, 36, 40, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Z-position", DLGTEXT +2, 7, 52, 55, 8
+ EDITTEXT DLGEDIT +2, 63, 50, 40, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 4, 67, 30, 12
+ PUSHBUTTON "&Cancel", IDCANCEL, 40, 67, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 76, 67, 30, 12
+}
+
+PROJECT DIALOG 5, 40, 230, 122
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Project File Definition"
+FONT 9, "System"
+{
+ LTEXT "&Vessel name",        DLGTEXT +0, 4,  5, 45, 8
+ EDITTEXT DLGEDIT +0, 67,  3, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ LTEXT "&File name",          DLGTEXT +1, 4, 25, 44, 8
+ EDITTEXT DLGEDIT +1, 67, 23, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse",  DLGPBF +0, 191, 23, 32, 12
+
+ LTEXT "&Editor",             DLGTEXT +2, 4, 45, 22, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ EDITTEXT DLGEDIT +2, 67, 43, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "b&Rrowse", DLGPBF +1, 191, 43, 32, 12
+
+ LTEXT "&Template directory", DLGTEXT +3, 4, 65, 63, 8
+ EDITTEXT DLGEDIT +3, 67, 63, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "bro&Wse",  DLGPBF +2, 191, 63, 32, 12
+
+ LTEXT "o&Utput directory",   DLGTEXT +4, 4, 85, 62, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ PUSHBUTTON "brow&Se",  DLGPBF +3, 191, 83, 32, 12
+ EDITTEXT DLGEDIT +4, 67, 83, 120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+
+ DEFPUSHBUTTON "&Ok", IDOK, 65, 103, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 100, 103, 30, 12
+ PUSHBUTTON "&Help", IDHELP, 135, 103, 30, 12
+}
+
+#endif
+
+CONFMODE DIALOG 6, 18, 148, 76
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Graphics Mode"
+FONT 9, "System"
+BEGIN
+    RADIOBUTTON "O&penGL", DLGRBN1+0, 55,  4, 38, 10
+    RADIOBUTTON "&GDI",    DLGRBN1+1, 55, 16, 38, 10
+#ifdef PROF
+    CHECKBOX "use &Temporary window for shaded",DLGLOG +0, 12, 32, 140, 10
+	LTEXT "GL views under GDI",-1, 22,42,100,10
+#endif
+    PUSHBUTTON "&Ok",     IDOK,      4, 58, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 54, 58, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 58, 40, 14
+END
+
+TEXTEDITLINES DIALOG 6, 18, 148, 48
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Text Edit Lines"
+FONT 9, "System"
+BEGIN
+	LTEXT "Number of lines in Text-edit dialog box:", -1, 20, 4, 72, 20
+	EDITTEXT DLGEDIT +0, 102,6,24,12, WS_BORDER | WS_TABSTOP
+    PUSHBUTTON "&Ok",     IDOK,      4, 28, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 54, 28, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 28, 40, 14
+END
+
+ELIMIT DIALOG 6, 18, 148, 68
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Limits for Floating Point Numbers"
+FONT 9, "System"
+BEGIN
+	LTEXT "Lowest value before using E+/-n format", -1, 8,  4, 100, 20
+	EDITTEXT DLGEDIT +0, 110, 6,30,12, WS_BORDER | WS_TABSTOP
+	LTEXT "Number of decimal places",               -1, 8, 28, 100, 12
+	EDITTEXT DLGEDIT +1, 110,26,30,12, WS_BORDER | WS_TABSTOP
+    PUSHBUTTON "&Ok",     IDOK,      4, 48, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 54, 48, 40, 14
+	PUSHBUTTON "&Help",   IDHELP,  104, 48, 40, 14
+END
+
+MOVE_BITMAP DIALOG 10,10,150,84
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Bitmap Overlay"
+FONT 12, "MS Sans Serif"
+BEGIN
+	LTEXT "Now you should move the bitmap into place, using the left mouse button:", -1, 10, 6, 130, 20
+	LTEXT "Use the left button to drag the image;", -1, 10, 28, 130, 20
+	LTEXT "Use the right button to mark the origin on the image.", -1, 10, 40, 130, 20
+    PUSHBUTTON "&Ok", IDOK, 50, 64, 40, 14
+END
+
+STRAKEICON ICON DISCARDABLE "strake64.ico"
+
+STRAKE DIALOG 18, 18, 170,144
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Strake definition"
+FONT 9, "System"
+{
+ LTEXT "&Index of line to replace",            DLGTEXT +0,  4,  6, 80,  8
+ EDITTEXT                                      DLGEDIT +0, 83,  4, 30, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "&Width",                               DLGTEXT +1,  4, 20, 55,  8
+ EDITTEXT                                      DLGEDIT +1, 83, 18, 30, 12, WS_BORDER | WS_TABSTOP
+
+ LTEXT "Inside top offset",                    DLGTEXT +2,  4, 36, 60,  8
+ EDITTEXT                                      DLGEDIT +2,  4, 46, 30, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "Inside bottom offset",                 DLGTEXT +3,  4, 62, 66,  8
+ EDITTEXT                                      DLGEDIT +3,  4, 72, 30, 12, WS_BORDER | WS_TABSTOP
+ RTEXT "Outside top offset",                   DLGTEXT +4,106, 36, 60,  8
+ EDITTEXT                                      DLGEDIT +4,136, 46, 30, 12, WS_BORDER | WS_TABSTOP
+ RTEXT "Outside bottom offset",                DLGTEXT +5, 96, 62, 70,  8
+ EDITTEXT                                      DLGEDIT +5,136, 72, 30, 12, WS_BORDER | WS_TABSTOP
+
+ LTEXT "Orientation:",                         -1,          4, 88, 38, 10
+ RADIOBUTTON "&Perpendicular to hull surface", DLGRBN1 +0,  4, 96,105, 10
+ RADIOBUTTON "&Fixed angle to horizontal:",    DLGRBN1 +1,  4,107, 94, 10
+ EDITTEXT                                      DLGEDIT +6,101,107, 30, 12
+ DEFPUSHBUTTON "&Ok",      IDOK, 18,124, 40, 14
+ PUSHBUTTON "&Cancel", IDCANCEL, 68,124, 40, 14
+ PUSHBUTTON "&Help",     IDHELP,118,124, 40, 14
+}
+
+#ifdef linux
+PRFONT DIALOG 20,20,130,93
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Printer Font"
+FONT 12, "MS Sans Serif"
+{
+ LTEXT "&Name",  -1,   4,  6, 40,8
+ EDITTEXT DLGEDIT +0, 40,  4, 80, 12, WS_BORDER | WS_TABSTOP
+ LTEXT "&Size",  -1,   4, 26, 40,8
+ EDITTEXT DLGEDIT +1, 40, 24, 40, 12, WS_BORDER | WS_TABSTOP
+ CHECKBOX "&Bold",     DLGLOG +0, 20, 40, 40, 12
+ CHECKBOX "&Italic",   DLGLOG +1, 70, 40, 40, 12
+ CHECKBOX "&Underline",DLGLOG +2, 20, 55, 40, 12
+ CHECKBOX "&Strikeout",DLGLOG +3, 70, 55, 40, 12
+ DEFPUSHBUTTON "&Ok",  IDOK,      15, 75, 30, 12, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL,  50, 75, 30, 12
+ PUSHBUTTON "&Help",   IDHELP,    85, 75, 30, 12
+}
+
+BROWSER DIALOG 20,20,168,60
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Select Browser for Help System"
+FONT 12, "MS Sans Serif"
+{
+ CTEXT "&Browser commmand",  -1, 34, 6, 100,8
+ EDITTEXT DLGEDIT +0, 4,  20, 160, 12, WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok",  IDOK,      34, 38, 30, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL,  69, 38, 30, 14
+ PUSHBUTTON "&Help",   IDHELP,   104, 38, 30, 14
+}
+
+#endif
+
+#ifdef PROF
+
+DXF_OVERLAY DIALOG 105, 34, 156, 78
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Import DXF File As Overlay"
+{
+ CHECKBOX "&Invert Z values",  DLGLOG +0,  6,  6, 66, 10
+ CHECKBOX "&Reverse X values", DLGLOG +1,  6, 18, 66, 10
+ LTEXT    "&File name ...",    -1,         6, 32, 51, 10
+ EDITTEXT                      DLGEDIT+0,  6, 44,144, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse",         DLGPBF +0,110, 28, 40, 14
+ DEFPUSHBUTTON "&Ok",          IDOK,      14, 60, 40, 14
+ PUSHBUTTON "&Cancel",         IDCANCEL,  58, 60, 40, 14
+ PUSHBUTTON "&Help",           IDHELP,   102, 60, 40, 14
+}
+
+ORC_OFFSETS DIALOG ,116,73,128,116
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "ORC offsets output"
+{
+ LTEXT "Measurer",                 -1,           4,  6,100,  8
+ EDITTEXT                          DLGEDIT +0, 100,  5, 24, 12
+ LTEXT "Series date",               -1,          4, 21,100,  8
+ EDITTEXT                          DLGEDIT +1, 100, 20, 24, 12
+ LTEXT "Forward freeboard section",-1,           4, 36,100,  8
+ EDITTEXT                          DLGEDIT +2, 100, 35, 24, 12
+ LTEXT "Aft freeboard section",    -1,           4, 51,100,  8
+ EDITTEXT                          DLGEDIT +3, 100, 50, 24, 12
+ LTEXT "File Name",                -1,           4, 70,112,  8
+ EDITTEXT                          DLGEDIT +4,   4, 82,120, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "&Browse",             DLGPBF +0,   86, 64, 38, 16
+ DEFPUSHBUTTON "&Ok",              IDOK,         4, 98, 32, 14
+ PUSHBUTTON "&Cancel",             IDCANCEL,    48, 98, 32, 14
+ PUSHBUTTON "&Help",               IDHELP,      92, 98, 32, 14
+}
+
+#endif
+
